@@ -14,8 +14,8 @@ public struct YAxisRange: View {
     private var minBound: CGFloat?
     private var maxBound: CGFloat?
 
-    @Environment(\.linearChartLayout)
-    private var layout: LinearChartLayout
+    @Environment(\.rectangularChartLayout)
+    private var layout: RectangularChartLayout
 
     @Environment(\.rectangularChartStyle)
     private var style: RectangularChartStyle

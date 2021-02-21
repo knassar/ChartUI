@@ -9,19 +9,19 @@
 import SwiftUI
 
 /// Highlights specified points in a LineChart
-public struct PointHighlight: PointDecorator {
+public struct PointHighlight: View {
 
-    public var appliesTo: PointApplication
+    public var appliesTo: PointSelection
 
-    @Environment(\.linearChartLayout)
-    public var layout: LinearChartLayout
+    @Environment(\.lineChartSegment)
+    public var segment: LineChartLayout.Segment
 
     @Environment(\.pointHighlightStyle)
     private var style: PointHighlightStyle
 
     /// Initialize the decorator
     /// - Parameter appliesTo: specifies the points which are to be highlighted
-    public init(appliesTo: PointApplication) {
+    public init(appliesTo: PointSelection) {
         self.appliesTo = appliesTo
     }
 
@@ -36,38 +36,59 @@ public struct PointHighlight: PointDecorator {
     public var body: some View {
         ZStack {
             if let fill = style.fill {
-                path
+                Highlight(segment: segment, application: appliesTo, radius: style.radius)
                     .fill()
                     .foregroundColor(fill)
             }
             if let stroke = style.stroke {
-                path
-                    .strokedPath(StrokeStyle(lineWidth: style.strokeWidth))
+                Highlight(segment: segment, application: appliesTo, radius: style.radius, strokeWidth: style.strokeWidth)
                     .foregroundColor(stroke)
             }
         }
     }
 
-    private var path: Path {
-        let rects = self.rects
-        guard !rects.isEmpty else { return Path() }
-        if let singleRect = rects.first, rects.count == 1 {
-            return Path(ellipseIn: singleRect)
-        } else {
-            var path = Path()
-            rects.forEach { path.addEllipse(in: $0) }
-            return path
-        }
-    }
+    private struct Highlight: InsettableShape {
 
-    private var rects: [CGRect] {
-        let radius = style.radius
-        return decoratedPoints.map { center in
-            CGRect(origin: CGPoint(x: center.x - radius, y: center.y - radius),
-                   size: CGSize(width: radius * 2, height: radius * 2))
+        var segment: LineChartLayout.Segment
+        var application: PointSelection
+        var radius: CGFloat
+        var strokeWidth: CGFloat?
+
+        var animatableData: LineChartLayout.Segment.AnimatableData {
+            get { segment.animatableData }
+            set { segment.animatableData = newValue }
         }
+
+        func inset(by amount: CGFloat) -> some InsettableShape {
+            self
+        }
+
+        func path(in rect: CGRect) -> Path {
+            var path: Path
+            let rects = self.rects
+            guard !rects.isEmpty else { return Path() }
+            if let singleRect = rects.first, rects.count == 1 {
+                path = Path(ellipseIn: singleRect)
+            } else {
+                path = Path()
+                rects.forEach { path.addEllipse(in: $0) }
+            }
+
+            if let strokeWidth = strokeWidth {
+                return path.strokedPath(StrokeStyle(lineWidth: strokeWidth))
+            } else {
+                return path
+            }
+        }
+
+        private var rects: [CGRect] {
+            return segment.pointsToDecorate(in: application).map { center in
+                CGRect(origin: CGPoint(x: center.x - radius, y: center.y - radius),
+                       size: CGSize(width: radius * 2, height: radius * 2))
+            }
+        }
+
     }
-    
 }
 
 struct PointHighlight_LibraryContent: LibraryContentProvider {

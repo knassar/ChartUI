@@ -14,6 +14,9 @@ public protocol AnyDataSeries {
     /// `true` if the series is empty
     var isEmpty: Bool { get }
 
+    /// The count of the series data
+    var count: Int { get }
+
     /// The first datum in the series (if `CategorizedDatum`), or the datum with the lowest `xValue` value (if `OrderedDatum`)
     var first: AnyDatum { get }
 

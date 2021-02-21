@@ -1,5 +1,5 @@
 //
-//  LinearChartLayout.swift
+//  RectangularChartLayout.swift
 //  ChartUI
 //
 //  Created by Karim Nassar on 2/20/21.
@@ -8,7 +8,7 @@
 
 import SwiftUI
 
-public struct LinearChartLayoutComposer<Content: View>: View {
+public struct RectangularChartLayoutComposer<Content: View>: View {
 
     private var data: AnyDataSeries
     private var geometry: GeometryProxy?
@@ -40,12 +40,12 @@ public struct LinearChartLayoutComposer<Content: View>: View {
             content()
                 .categorizedChartData(categorizedData)
                 .chartLayout(localFrame: localFrame)
-                .environment(\.linearChartLayout, linearLayout())
+                .environment(\.rectangularChartLayout, linearLayout())
         default:
             content()
                 .orderedChartData(data)
                 .chartLayout(localFrame: localFrame)
-                .environment(\.linearChartLayout, linearLayout())
+                .environment(\.rectangularChartLayout, linearLayout())
         }
     }
 
@@ -53,18 +53,18 @@ public struct LinearChartLayoutComposer<Content: View>: View {
         geometry?.frame(in: .local) ?? .zero
     }
 
-    private func linearLayout() -> LinearChartLayout {
+    private func linearLayout() -> RectangularChartLayout {
         switch data {
         case let categorizedData as AnyCategorizedDataSeries:
-            return LinearChartLayout(data: categorizedData, localFrame: localFrame, insets: chartLayout.insets, barsStyle: barsStyle)
+            return RectangularChartLayout(data: categorizedData, localFrame: localFrame, insets: chartLayout.insets, barsStyle: barsStyle)
         default:
-            return LinearChartLayout(data: data, localFrame: localFrame, insets: chartLayout.insets, xRange: xRange)
+            return RectangularChartLayout(data: data, localFrame: localFrame, insets: chartLayout.insets, xRange: xRange)
         }
     }
 
 }
 
-extension LinearChartLayoutComposer: Animatable {
+extension RectangularChartLayoutComposer: Animatable {
 
     public var animatableData: AnimatablePair<CGFloat, CGFloat> {
         get {
@@ -87,37 +87,33 @@ extension LinearChartLayoutComposer: Animatable {
 
 // MARK: - Layout Environment Key
 
-struct LinearChartLayoutKey: EnvironmentKey {
-    static let defaultValue: LinearChartLayout = LinearChartLayout()
+struct RectangularChartLayoutKey: EnvironmentKey {
+    static let defaultValue: RectangularChartLayout = RectangularChartLayout()
 }
 
 extension EnvironmentValues {
 
-    public var linearChartLayout: LinearChartLayout {
-        get { self[LinearChartLayoutKey.self] }
-        set { self[LinearChartLayoutKey.self] = newValue }
+    public var rectangularChartLayout: RectangularChartLayout {
+        get { self[RectangularChartLayoutKey.self] }
+        set { self[RectangularChartLayoutKey.self] = newValue }
     }
 
 }
 
 // MARK: - AnyDataSeries Layout
 
-public struct LinearChartLayout {
+public struct RectangularChartLayout {
 
-    public private(set) var visibleDataPoints: [CGPoint] = []
     public private(set) var absoluteDataBounds = Bounds()
-    public private(set) var visibleDataBounds = Bounds()
+    public private(set) var yDataBoundsWithInsets: ClosedRange<CGFloat> = 0...0
     public private(set) var origin: CGPoint = .zero
     public private(set) var segments = [Segment]()
     public private(set) var localFrame = CGRect.zero
     public private(set) var insets = EdgeInsets()
     public private(set) var xRange: Range<CGFloat>?
 
-    private var dataToLayoutTransformX: (CGFloat) -> CGFloat = { $0 }
     private var dataToLayoutTransformY: (CGFloat) -> CGFloat = { $0 }
-    private var layoutToDataTransformX: (CGFloat) -> CGFloat = { $0 }
     private var layoutToDataTransformY: (CGFloat) -> CGFloat = { $0 }
-    private var visibleRangeX: ClosedRange<CGFloat> = 0...0
 
     public var insetFrame: CGRect {
         CGRect(x: localFrame.minX + insets.leading,
@@ -146,129 +142,47 @@ public struct LinearChartLayout {
 
 // MARK: - Coordinate Space Conversion
 
-extension LinearChartLayout {
-
-    public func visibleLayoutPoint(for datum: AnyDatum) -> CGPoint? {
-        let point = CGPoint(x: datum.xValue, y: datum.yValue)
-        guard isVisible(point) else { return nil }
-        return pointInLayout(fromDataPoint: point)
-    }
-
-    public func isVisible(_ point: CGPoint) -> Bool {
-        visibleRangeX.contains(point.x)
-    }
-
-    public func isVisible(x: CGFloat) -> Bool {
-        visibleRangeX.contains(x)
-    }
+extension RectangularChartLayout {
 
     public func isVisible(y: CGFloat) -> Bool {
-        (visibleDataBounds.minimum...visibleDataBounds.maximum).contains(y)
-    }
-
-    public func pointInLayout(from datum: AnyDatum) -> CGPoint {
-        pointInLayout(fromDataPoint: CGPoint(x: datum.xValue, y: datum.yValue))
-    }
-
-    public func pointInLayout(fromDataPoint point: CGPoint) -> CGPoint {
-        dataToLayoutTransform(point)
-    }
-
-    public func dataScalePoint(fromPointInLayout point: CGPoint) -> CGPoint {
-        layoutToDataTransform(point)
-    }
-
-    public func xInLayout(fromDataX x: CGFloat) -> CGFloat {
-        dataToLayoutTransformX(x)
+        (absoluteDataBounds.minimum...absoluteDataBounds.maximum).contains(y)
     }
 
     public func yInLayout(fromDataY y: CGFloat) -> CGFloat {
         dataToLayoutTransformY(y)
     }
 
-    private func dataToLayoutTransform(_ point: CGPoint) -> CGPoint {
-        CGPoint(x: dataToLayoutTransformX(point.x), y: dataToLayoutTransformY(point.y))
-    }
-
-    private func layoutToDataTransform(_ point: CGPoint) -> CGPoint {
-        CGPoint(x: layoutToDataTransformX(point.x), y: layoutToDataTransformY(point.y))
-    }
-
 }
 
-extension LinearChartLayout {
+extension RectangularChartLayout {
 
     private mutating func recalculate(with data: AnyDataSeries) {
-        computeAbsoluteBounds(of: data)
 
-        let available = insetFrame.size
-        let unitX = available.width / (dataEnd - dataStart)
-        let unitY = available.height / absoluteDataBounds.size.height
-
-        computeLayoutMetrics(with: unitX, unitY)
-
-        var minVisibleX: CGFloat = 0
-        var maxVisibleX = dataEnd
-        let points: [CGPoint] = data.allData.map { datum in
-            let point = CGPoint(x: datum.xValue, y: datum.yValue)
-            if datum.xValue < dataStart {
-                minVisibleX = datum.xValue
-            }
-            if  maxVisibleX != dataEnd && datum.xValue > dataEnd {
-                maxVisibleX = datum.xValue
-            }
-            return point
-        }
-        self.visibleRangeX = min(minVisibleX, maxVisibleX)...max(minVisibleX, maxVisibleX)
-
-        self.visibleDataPoints = points
-            .filter { isVisible($0) }
-            .map { dataToLayoutTransform($0) }
-
-    }
-
-    private var dataStart: CGFloat {
-        xRange?.lowerBound ?? absoluteDataBounds.start
-    }
-
-    private var dataEnd: CGFloat {
-        xRange?.upperBound ?? absoluteDataBounds.end
-    }
-
-    private mutating func computeAbsoluteBounds(of data: AnyDataSeries) {
         self.absoluteDataBounds = Bounds(origin: .zero,
                                          start: data.first.xValue,
                                          end: data.last.xValue,
                                          maximum: data.maximum.yValue,
                                          minimum: abs(Swift.min(data.minimum.yValue, 0)))
-    }
-
-    private mutating func computeLayoutMetrics(with unitX: CGFloat, _ unitY: CGFloat) {
-
-        self.visibleDataBounds = Bounds(origin: .zero,
-                                        start: dataStart - insets.leading / unitX,
-                                        end: dataEnd + insets.trailing / unitX,
-                                        maximum: absoluteDataBounds.maximum + insets.top / unitY,
-                                        minimum: absoluteDataBounds.minimum - insets.bottom / unitY)
-
-        self.origin = CGPoint(x: 0 - dataStart * unitX,
-                              y: 0 - absoluteDataBounds.minimum * unitY)
 
         let yOffset = size.height
+        let unitY = yOffset / absoluteDataBounds.size.height
         let yInset = insets.top
-        let dataStart = self.dataStart
         let dataMin = absoluteDataBounds.minimum
 
-        self.dataToLayoutTransformX = { ($0 - dataStart) * unitX }
         self.dataToLayoutTransformY = { yOffset - (($0 - dataMin) * unitY) + yInset }
 
+        self.yDataBoundsWithInsets = (
+            absoluteDataBounds.minimum - insets.bottom / unitY
+        )...(
+            absoluteDataBounds.maximum + insets.top / unitY
+        )
     }
 
 }
 
 // MARK: - AnyCategorizedDataSeries Layout
 
-extension LinearChartLayout {
+extension RectangularChartLayout {
 
     public func segment(at index: Int) -> Segment? {
         guard index < segments.count else { return nil }
@@ -284,11 +198,11 @@ extension LinearChartLayout {
 
     private mutating func recalculate(with data: AnyCategorizedDataSeries, barsStyle: LinearBarsStyle) {
         self.recalculate(with: data)
-
+        
+        let available = insetFrame.size
         let barCount = data.categorizedData.count
 
         let spacerCount = barCount - 1
-        let available = insetFrame.size
         var (availableWidth, availableHeight) = barsStyle.orientation == .horizontal
             ? (available.width, available.height)
             : (available.height, available.width)

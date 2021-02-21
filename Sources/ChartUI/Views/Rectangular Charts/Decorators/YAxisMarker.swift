@@ -9,20 +9,20 @@
 import SwiftUI
 
 /// Highlights specified points in a LineChart with the designated `PointAxisMarker`
-public struct YAxisMarker: PointDecorator {
+public struct YAxisMarker: View {
 
     private var marker: PointAxisMarker
-    public var appliesTo: PointApplication
+    public var appliesTo: PointSelection
 
-    @Environment(\.linearChartLayout)
-    public var layout: LinearChartLayout
+    @Environment(\.lineChartSegment)
+    public var segment: LineChartLayout.Segment
 
     @Environment(\.pointHighlightStyle)
     private var style: PointHighlightStyle
 
     /// Initialize the decorator
     /// - Parameter appliesTo: specifies the points which are to be highlighted
-    public init(_ marker: PointAxisMarker, appliesTo: PointApplication) {
+    public init(_ marker: PointAxisMarker, appliesTo: PointSelection) {
         self.marker = marker
         self.appliesTo = appliesTo
     }
@@ -37,35 +37,61 @@ public struct YAxisMarker: PointDecorator {
     }
 
     public var body: some View {
-        var path = Path()
-        self.decoratedPoints.forEach { point in
-            path.move(to: CGPoint(x: 0, y: point.y))
-            path.addLine(to: CGPoint(x: markerMapX(point.x), y: point.y))
-        }
-        return path
-            .strokedPath(StrokeStyle(lineWidth: style.strokeWidth, lineCap: lineCap))
+        Mark(segment: segment, application: appliesTo, marker: marker, strokeWidth: style.strokeWidth)
             .foregroundColor(style.stroke)
     }
 
-    private var markerMapX: (CGFloat) -> CGFloat {
-        switch marker {
-        case let .axisTic(length):
-            return { _ in length }
-        case let .toPoint(extending):
-            return { $0 + extending }
-        case .thruRange:
-            return { _ in layout.localFrame.maxX }
+    private struct Mark: InsettableShape {
+
+        var segment: LineChartLayout.Segment
+        var application: PointSelection
+        var marker: PointAxisMarker
+        var strokeWidth: CGFloat
+
+        @Environment(\.lineChartLayout)
+        var lineLayout: LineChartLayout
+
+        var animatableData: LineChartLayout.Segment.AnimatableData {
+            get { segment.animatableData }
+            set { segment.animatableData = newValue }
         }
+
+        func inset(by amount: CGFloat) -> some InsettableShape {
+            self
+        }
+
+        func path(in rect: CGRect) -> Path {
+            var path = Path()
+            segment.pointsToDecorate(in: application).forEach { point in
+                path.move(to: CGPoint(x: 0, y: point.y))
+                path.addLine(to: CGPoint(x: markerMapX(point.x), y: point.y))
+            }
+            return path
+                .strokedPath(StrokeStyle(lineWidth: strokeWidth, lineCap: lineCap))
+        }
+
+        private var markerMapX: (CGFloat) -> CGFloat {
+            switch marker {
+            case let .axisTic(length):
+                return { _ in length }
+            case let .toPoint(extending):
+                return { $0 + extending }
+            case .thruRange:
+                return { _ in lineLayout.localFrame.maxX }
+            }
+        }
+
+        private var lineCap: CGLineCap {
+            switch marker {
+            case .axisTic, .thruRange:
+                return .butt
+            case .toPoint:
+                return .round
+            }
+        }
+
     }
 
-    private var lineCap: CGLineCap {
-        switch marker {
-        case .axisTic, .thruRange:
-            return .butt
-        case .toPoint:
-            return .round
-        }
-    }
 }
 
 struct YAxisMarker_LibraryContent: LibraryContentProvider {

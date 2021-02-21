@@ -9,20 +9,23 @@
 import SwiftUI
 
 /// Highlights specified points in a LineChart with the designated `PointAxisMarker`
-public struct XAxisMarker: PointDecorator {
+public struct XAxisMarker: View {
 
-    public var appliesTo: PointApplication
+    public var appliesTo: PointSelection
     private var marker: PointAxisMarker
 
-    @Environment(\.linearChartLayout)
-    public var layout: LinearChartLayout
+    @Environment(\.lineChartLayout)
+    public var lineLayout: LineChartLayout
+
+    @Environment(\.lineChartSegment)
+    public var segment: LineChartLayout.Segment
 
     @Environment(\.pointHighlightStyle)
     private var style: PointHighlightStyle
 
     /// Initialize the decorator
     /// - Parameter appliesTo: specifies the points which are to be highlighted
-    public init(_ marker: PointAxisMarker, appliesTo: PointApplication) {
+    public init(_ marker: PointAxisMarker, appliesTo: PointSelection) {
         self.marker = marker
         self.appliesTo = appliesTo
     }
@@ -37,35 +40,62 @@ public struct XAxisMarker: PointDecorator {
     }
 
     public var body: some View {
-        var path = Path()
-        self.decoratedPoints.forEach { point in
-            path.move(to: CGPoint(x: point.x, y: layout.localFrame.maxY))
-            path.addLine(to: CGPoint(x: point.x, y: markerMapY(point.y)))
-        }
-        return path
-            .strokedPath(StrokeStyle(lineWidth: style.strokeWidth, lineCap: lineCap))
+        Mark(segment: segment, application: appliesTo, marker: marker, strokeWidth: style.strokeWidth)
             .foregroundColor(style.stroke)
     }
 
-    private var markerMapY: (CGFloat) -> CGFloat {
-        switch marker {
-        case let .axisTic(length):
-            return { _ in layout.localFrame.maxY - length }
-        case let .toPoint(extending):
-            return { $0 + extending }
-        case .thruRange:
-            return { _ in 0 }
+    private struct Mark: InsettableShape {
+
+        var segment: LineChartLayout.Segment
+        var application: PointSelection
+        var marker: PointAxisMarker
+        var strokeWidth: CGFloat
+
+        @Environment(\.rectangularChartLayout)
+        var rectLayout: RectangularChartLayout
+
+        var animatableData: LineChartLayout.Segment.AnimatableData {
+            get { segment.animatableData }
+            set { segment.animatableData = newValue }
         }
+
+        func inset(by amount: CGFloat) -> some InsettableShape {
+            self
+        }
+
+        func path(in rect: CGRect) -> Path {
+            var path = Path()
+            segment.pointsToDecorate(in: application).forEach { point in
+                path.move(to: CGPoint(x: point.x,
+                                      y: rectLayout.localFrame.maxY))
+                path.addLine(to: CGPoint(x: point.x, y: markerMapY(point.y)))
+            }
+            return path
+                .strokedPath(StrokeStyle(lineWidth: strokeWidth, lineCap: lineCap))
+        }
+
+        private var markerMapY: (CGFloat) -> CGFloat {
+            switch marker {
+            case let .axisTic(length):
+                return { _ in rectLayout.localFrame.maxY - length }
+            case let .toPoint(extending):
+                return { $0 + extending }
+            case .thruRange:
+                return { _ in 0 }
+            }
+        }
+
+        private var lineCap: CGLineCap {
+            switch marker {
+            case .axisTic, .thruRange:
+                return .butt
+            case .toPoint:
+                return .round
+            }
+        }
+
     }
 
-    private var lineCap: CGLineCap {
-        switch marker {
-        case .axisTic, .thruRange:
-            return .butt
-        case .toPoint:
-            return .round
-        }
-    }
 }
 
 struct XAxisMarker_LibraryContent: LibraryContentProvider {

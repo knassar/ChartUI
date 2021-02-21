@@ -16,6 +16,10 @@ public struct DataSeries<P: Datum>: AnyDataSeries {
         data.isEmpty
     }
 
+    public var count: Int {
+        data.count
+    }
+
     public private(set) var first: AnyDatum = .invalid
     public private(set) var last: AnyDatum = .invalid
     public private(set) var minimum: AnyDatum = .invalid

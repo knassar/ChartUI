@@ -12,8 +12,8 @@ struct InlineRectangularLegend: View {
 
     var legendStyle: InlineLegendStyle
 
-    @Environment(\.linearChartLayout)
-    var layout: LinearChartLayout
+    @Environment(\.rectangularChartLayout)
+    var layout: RectangularChartLayout
 
     var body: some View {
         ZStack {
@@ -36,19 +36,19 @@ struct InlineRectangularLegend: View {
         }
     }
 
-    private func labelWidth(for segment: LinearChartLayout.Segment) -> CGFloat {
+    private func labelWidth(for segment: RectangularChartLayout.Segment) -> CGFloat {
         segment.rect.width
     }
 
-    private func labelHeight(for segment: LinearChartLayout.Segment) -> CGFloat {
+    private func labelHeight(for segment: RectangularChartLayout.Segment) -> CGFloat {
         24
     }
 
-    private func labelX(for segment: LinearChartLayout.Segment) -> CGFloat {
+    private func labelX(for segment: RectangularChartLayout.Segment) -> CGFloat {
         segment.rect.midX - layout.localFrame.center.x
     }
 
-    private func labelY(for segment: LinearChartLayout.Segment) -> CGFloat {
+    private func labelY(for segment: RectangularChartLayout.Segment) -> CGFloat {
         segment.rect.maxY - layout.localFrame.center.y + labelHeight(for: segment) / 2
     }
 

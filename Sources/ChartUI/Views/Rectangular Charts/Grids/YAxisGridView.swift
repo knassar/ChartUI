@@ -37,8 +37,15 @@ struct YAxisGridView: View {
 
     var grid: YAxisGrid
 
-    @Environment(\.linearChartLayout)
-    private var layout: LinearChartLayout
+    var segment: LineChartLayout.Segment?
+
+    init(grid: YAxisGrid, segment: LineChartLayout.Segment? = nil) {
+        self.grid = grid
+        self.segment = segment
+    }
+
+    @Environment(\.rectangularChartLayout)
+    private var layout: RectangularChartLayout
 
     var body: some View {
         ForEach(gridLines(grid), id: \.self) { y in
@@ -50,23 +57,30 @@ struct YAxisGridView: View {
     private func gridLines(_ grid: YAxisGrid) -> [CGFloat] {
         var lines = [CGFloat]()
         let step = grid.gridSpacing
-        var y = gridOriginY
-        while y <= layout.visibleDataBounds.maximum {
+        var y = firstOriginAlignedY
+        while y <= layout.yDataBoundsWithInsets.upperBound {
             lines.append(y)
             y += step
         }
-        y = gridOriginY
-        while y >= layout.visibleDataBounds.minimum {
-            y -= step
-            lines.append(y)
+        return lines.map {
+            layout.yInLayout(fromDataY: $0)
         }
-        return lines
     }
 
     private func lineSegment(at y: CGFloat) -> LineSegment {
-        let y = layout.yInLayout(fromDataY: y)
-        return LineSegment(start: CGPoint(x: layout.localFrame.minX, y: y),
-                           end: CGPoint(x: layout.localFrame.maxX, y: y))
+        return LineSegment(start: CGPoint(x: minX, y: y),
+                           end: CGPoint(x: maxX, y: y))
+    }
+
+    private var firstOriginAlignedY: CGFloat {
+        var y = gridOriginY
+        while y > layout.yDataBoundsWithInsets.lowerBound  {
+            y -= grid.gridSpacing
+        }
+        while y <= layout.yDataBoundsWithInsets.lowerBound - 1 {
+            y += grid.gridSpacing
+        }
+        return y
     }
 
     private var gridOriginY: CGFloat {
@@ -75,6 +89,20 @@ struct YAxisGridView: View {
 
     private var originVisible: Bool {
         layout.isVisible(y: gridOriginY)
+    }
+
+    private var minX: CGFloat {
+        guard let segment = segment, !segment.position.contains(.first) else {
+            return layout.localFrame.minX
+        }
+        return segment.rect.minX
+    }
+
+    private var maxX: CGFloat {
+        guard let segment = segment, !segment.position.contains(.last) else {
+            return layout.localFrame.maxX
+        }
+        return segment.rect.maxX
     }
 
 }

@@ -14,8 +14,11 @@ public struct XAxisRange: View {
     private var minBound: CGFloat?
     private var maxBound: CGFloat?
 
-    @Environment(\.linearChartLayout)
-    private var layout: LinearChartLayout
+    @Environment(\.lineChartLayout)
+    private var layout: LineChartLayout
+
+    @Environment(\.lineChartSegment)
+    private var segment: LineChartLayout.Segment
 
     @Environment(\.rectangularChartStyle)
     private var style: RectangularChartStyle
@@ -51,7 +54,7 @@ public struct XAxisRange: View {
     }
 
     private var scaledMinX: CGFloat {
-        if let minBound = minBound, layout.isVisible(x: minBound) {
+        if let minBound = minBound, segment.isVisible(x: minBound) {
             return layout.xInLayout(fromDataX: minBound)
         } else {
             return 0
@@ -59,10 +62,10 @@ public struct XAxisRange: View {
     }
 
     private var scaledMaxX: CGFloat {
-        if let maxBound = maxBound, layout.isVisible(x: maxBound) {
+        if let maxBound = maxBound, segment.isVisible(x: maxBound) {
             return layout.xInLayout(fromDataX: maxBound)
         } else {
-            return 0
+            return layout.localFrame.maxX
         }
     }
 
@@ -119,11 +122,12 @@ struct XAxisRange_LibraryContent: LibraryContentProvider {
 struct XAxisRange_Previews: PreviewProvider {
     static var previews: some View {
         LineChart(data: sampleTimeSeries, trimmedTo: .previousWeek, underlay: ZStack {
-            XAxisRange(...Date.today.dayBefore)
+            XAxisRange(...Date.today.dayBefore.dayBefore)
                 .rectChartRange(fill: Color.red.opacity(0.2))
                 .rectChartRange(stroke: .red)
-            XAxisRange(Date.today...Date.today(at: TimeInterval.t(12)))
+            XAxisRange(Date.today.dayBefore...)
         })
+            .rectChartRange(fill: Color.green.opacity(0.2))
             .rectChartRange(stroke: .blue)
             .frame(width: 300, height: 150)
     }

@@ -36,8 +36,11 @@ public enum OriginMark {
 /// Renders a specified mark for the X, Y, or both origins in a rectangular chart.
 public struct Origin: View {
 
-    @Environment(\.linearChartLayout)
-    private var layout: LinearChartLayout
+    @Environment(\.rectangularChartLayout)
+    private var layout: RectangularChartLayout
+
+    @Environment(\.lineChartSegment)
+    private var segment: LineChartLayout.Segment
 
     @Environment(\.rectangularChartStyle)
     private var style: RectangularChartStyle
@@ -54,7 +57,7 @@ public struct Origin: View {
     }
 
     private func lineSegment(atX x: CGFloat, ends: (CGFloat, CGFloat)) -> LineSegment {
-        let x = layout.xInLayout(fromDataX: x)
+        let x = segment.xInSegment(fromDataX: x)
         return LineSegment(start: CGPoint(x: x, y: ends.0),
                            end: CGPoint(x: x, y: ends.1))
     }
@@ -88,12 +91,12 @@ public struct Origin: View {
             return (layout.localFrame.minX, layout.localFrame.maxX)
         case let (.tic(length, _), .some(spacing)):
             let ticLength = length * spacing
-            return (layout.xInLayout(fromDataX: originX - ticLength),
-                    layout.xInLayout(fromDataX: originX + ticLength))
+            return (segment.xInSegment(fromDataX: originX - ticLength),
+                    segment.xInSegment(fromDataX: originX + ticLength))
         case let (.positiveTic(length, _), .some(spacing)):
             let ticLength = length * spacing
-            return (layout.xInLayout(fromDataX: originX),
-                    layout.xInLayout(fromDataX: originX + ticLength))
+            return (segment.xInSegment(fromDataX: originX),
+                    segment.xInSegment(fromDataX: originX + ticLength))
         }
     }
 
@@ -109,7 +112,7 @@ public struct Origin: View {
     }
 
     private var xOriginVisible: Bool {
-        layout.isVisible(x: originX)
+        segment.isVisible(x: originX)
     }
 
     private var yGrid: YAxisGrid? {

@@ -68,7 +68,7 @@ struct BarChart<P: CategorizedDatum, Underlay: View, Overlay: View>: View {
 
     public var body: some View {
         GeometryReader { geometry in
-            LinearChartLayoutComposer(data: data, geometry: geometry) {
+            RectangularChartLayoutComposer(data: data, geometry: geometry) {
                 if let grid = rectChartStyle.yAxisGrid {
                     YAxisGridView(grid: grid)
                         .animation(.default)

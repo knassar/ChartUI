@@ -57,7 +57,7 @@ public protocol CategorizedDatum: Datum, Identifiable {
 }
 
 /// A type-erased wrapper for any `Datum`
-public struct AnyDatum: Datum {
+public struct AnyDatum: Datum, Equatable {
 
     let datum: Datum
 
@@ -85,6 +85,10 @@ public struct AnyDatum: Datum {
         self.xValue = datum.xValue
         self.yValue = datum.yValue
         self.isValid = datum.isValid
+    }
+
+    public static func == (lhs: AnyDatum, rhs: AnyDatum) -> Bool {
+        lhs.xValue == rhs.xValue && lhs.yValue == rhs.yValue
     }
 
 }

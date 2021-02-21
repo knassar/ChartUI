@@ -88,6 +88,13 @@ struct PieChart_Previews: PreviewProvider {
         @State
         var dataToggle = true
 
+        var projection: String {
+            sampleCalendarData.categorizedData[project].id as! String
+        }
+
+        @State
+        var project = 0
+
         var body: some View {
             VStack {
                 Spacer()
@@ -95,8 +102,14 @@ struct PieChart_Previews: PreviewProvider {
                 PieChart(data: dataToggle ? sampleCalendarData : sampleCalendarData2)
                     .chartInsets(.trailing, 5)
                     .chartInsets(.leading, 100)
+                    .radialChart(outerRadius: 80)
                     .chartSegments(strokeWidth: 1)
+                    .radialChart(projection: 20, for: projection)
                     .chartLegend(style: DefaultLegendStyle(nameMapper: sampleCalendarDataNameMapper))
+                    .onTapGesture {
+                        project = (project + 1) % sampleCalendarData.count
+                    }
+
                 Spacer()
                 Text("PieChart with an Inline Legend")
                 PieChart(data: dataToggle ? sampleCalendarData : sampleCalendarData2)

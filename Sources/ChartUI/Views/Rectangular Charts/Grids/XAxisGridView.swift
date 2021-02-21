@@ -57,46 +57,87 @@ struct XAxisGridView: View {
 
     var grid: XAxisGrid
 
-    @Environment(\.linearChartLayout)
-    private var layout: LinearChartLayout
+    var segment: LineChartLayout.Segment
+
+    @Environment(\.rectangularChartLayout)
+    private var rectLayout: RectangularChartLayout
+
+    @Environment(\.lineChartLayout)
+    private var lineLayout: LineChartLayout
 
     var body: some View {
-        ForEach(gridLines(grid), id: \.self) { x in
-            lineSegment(at: x)
-                .strokeBorder(grid.color, lineWidth: 0.5)
+        GridLines(segment: segment, grid: grid, lineLayout: lineLayout, rectLayout: rectLayout)
+            .animation(.default)
+            .foregroundColor(grid.color)
+    }
+
+    private struct GridLines: InsettableShape {
+
+        var segment: LineChartLayout.Segment
+        var grid: XAxisGrid
+        var lineLayout: LineChartLayout
+        var rectLayout: RectangularChartLayout
+
+        var animatableData: LineChartLayout.Segment.AnimatableData {
+            get { segment.animatableData }
+            set { segment.animatableData = newValue }
         }
-    }
 
-    private func gridLines(_ grid: XAxisGrid) -> [CGFloat] {
-        var lines = [CGFloat]()
-        let step = grid.gridSpacing
-        var x = gridOriginX
-        while x <= layout.visibleDataBounds.end {
-            lines.append(x)
-            x += step
+        func inset(by amount: CGFloat) -> some InsettableShape {
+            self
         }
-        x = gridOriginX
-        while x >= layout.visibleDataBounds.start {
-            lines.append(x)
-            x -= step
+
+        func path(in rect: CGRect) -> Path {
+            var path = Path()
+            for x in gridLines(grid) {
+                path.move(to: CGPoint(x: x, y: 0))
+                path.addLine(to: CGPoint(x: x, y: rectLayout.localFrame.height))
+            }
+            return path.strokedPath(StrokeStyle(lineWidth: 0.5))
         }
-        return lines
-    }
 
-    private func lineSegment(at x: CGFloat) -> LineSegment {
-        let x = layout.xInLayout(fromDataX: x)
-        return LineSegment(start: CGPoint(x: x, y: layout.localFrame.minY),
-                           end: CGPoint(x: x, y: layout.localFrame.maxY))
-    }
+        private func gridLines(_ grid: XAxisGrid) -> [CGFloat] {
+            var lines = [CGFloat]()
+            let step = grid.gridSpacing
+            var x = firstOriginAlignedX
+            while x <= endPoint {
+                lines.append(x)
+                x += step
+            }
+            return lines.map {
+                segment.xInSegment(fromDataX: $0)
+            }
+        }
 
-    private var gridOriginX: CGFloat {
-        grid.originIsAbsolute
-            ? grid.origin
-            : layout.origin.x + grid.origin
-    }
+        private var firstOriginAlignedX: CGFloat {
+            var x = gridOriginX
+            while x > startPoint  {
+                x -= grid.gridSpacing
+            }
+            while x < startPoint  {
+                x += grid.gridSpacing
+            }
+            return x
+        }
 
-    private var originVisible: Bool {
-        layout.isVisible(x: gridOriginX)
+        private var gridOriginX: CGFloat {
+            grid.originIsAbsolute
+                ? grid.origin
+                : rectLayout.origin.x + grid.origin
+        }
+
+        private var startPoint: CGFloat {
+            segment.position.contains(.first)
+                ? lineLayout.xDataBoundsWithInsets.lowerBound
+                : segment.startX
+        }
+
+        private var endPoint: CGFloat {
+            segment.position.contains(.last)
+                ? lineLayout.xDataBoundsWithInsets.upperBound
+                : segment.endX
+        }
+
     }
 
 }

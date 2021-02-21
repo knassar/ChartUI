@@ -10,13 +10,15 @@ This project has the following goals:
 4. **Make Pretty (and Useful!) Charts** 
 
 Currently supports 4 chart types: 
+    
+|                  | Rectangular | Radial                 |
+|------------------|-------------|------------------------|
+| Categorized data | `BarChart`  | `PieChart` <br> `RingChart` |
+| Ordered data     | `LineChart` |                        |
 
-* Rectangular
-    - LineChart (ordered data) - _Does not currently support animation_
-    - BarChart (categorized data) - supports animated changes to data values
-* Radial
-    - PieChart (categorized data) - supports animated changes to data values
-    - RingChart (categorized data) - supports animated changes to data values
+Categorized data charts gracefully animate value changes when you replace their data series, as long as the category Ids remain consistent.
+
+Ordered data charts gracefully animate changes to their visible X boundaries.
 
 ## Data
 
@@ -178,9 +180,7 @@ If this is starting too look too complicated, remember that all Decorators and m
 
 Some things I want to achieve (and/or have plans for), in no particular order: 
 
-* Structural improvements to `LineChart` to support: 
-  - Animation of X- and Y- visible range changes
-  - Performant "lazy" rendering of large data sets
+* Performant "lazy" rendering of very large data sets in `LineChart`
 * Multiple-DataSet support for all chart types
 * Interactions
   - Data Loupe

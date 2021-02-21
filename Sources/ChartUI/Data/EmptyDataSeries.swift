@@ -12,6 +12,7 @@ import SwiftUI
 struct EmptyDataSeries: AnyCategorizedDataSeries {
 
     let allData: [AnyDatum] = []
+    let count = 0
     let isEmpty: Bool = true
     let first: AnyDatum = .invalid
     let last: AnyDatum = .invalid

@@ -10,9 +10,9 @@ import SwiftUI
 
 protocol BarShape: InsettableShape {
 
-    var segment: LinearChartLayout.Segment { get }
+    var segment: RectangularChartLayout.Segment { get }
 
-    init(segment: LinearChartLayout.Segment)
+    init(segment: RectangularChartLayout.Segment)
 
 }
 
@@ -32,8 +32,8 @@ struct Bar<Shape: BarShape>: View {
     @Environment(\.categorizedDataStyle)
     var style: CategorizedDataStyle
 
-    @Environment(\.linearChartLayout)
-    var layout: LinearChartLayout
+    @Environment(\.rectangularChartLayout)
+    var layout: RectangularChartLayout
 
     var body: some View {
         if let segmentLayout = layout.segment(at: datum.index), segmentLayout.isValid {
@@ -59,14 +59,14 @@ struct Bar<Shape: BarShape>: View {
 
 struct RectBar: BarShape {
 
-    var segment: LinearChartLayout.Segment
+    var segment: RectangularChartLayout.Segment
 
-    var animatableData: LinearChartLayout.Segment.AnimatableData {
+    var animatableData: RectangularChartLayout.Segment.AnimatableData {
         get { segment.animatableData }
         set { segment.animatableData = newValue }
     }
 
-    init(segment: LinearChartLayout.Segment) {
+    init(segment: RectangularChartLayout.Segment) {
         self.segment = segment
     }
 
@@ -80,7 +80,7 @@ struct Bar_Previews: PreviewProvider {
     static var previews: some View {
         let data = sampleCalendarData
         GeometryReader { geometry in
-            LinearChartLayoutComposer(data: data, geometry: geometry) {
+            RectangularChartLayoutComposer(data: data, geometry: geometry) {
                 Bar(datum: data.categorizedData[0], shape: RectBar.self)
                 Bar(datum: data.categorizedData[3], shape: RectBar.self)
                 Bar(datum: data.categorizedData[6], shape: RectBar.self)
