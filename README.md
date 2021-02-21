@@ -31,6 +31,17 @@ Consuming code should never conform types directly to `Datum`, instead, chose on
 - `OrderedDatum` holds an X & Y value, suitable for plotting Ys over Xs. This type can be visualized in a `LineChart` 
 - `CategorizedDatum` holds a Value indexed by an Id, suitable for plotting Values by Index. This type can be visualized in a `BarChart`, `PieChart`, or `RingChart`.
 
+Certain use-cases of both `OrderedDatum` and `CategorizedDatum` are so common, that ChartUI has two built-in concrete conformances of these protocols made to be very easy to use out of the box:
+
+- `TimeSeriesDatum` is an `OrderedDatum`-conforming concrete type providing a `Date` X-axis and a generic Y axis, designed for graphing some `DataValue` over time in a `LineChart`
+- `IdentifiedValueDatum` is a `CategorizedDatum`-conforming concrete type generic over `Id` and `DataValue` properties in any categorized data chart such as a `BarChart` or `PieChart`
+
+While you are certainly free to build your own conformances to either datum type, these should be sufficient for most uses.
+
+### Example: "Temperature over Time"
+
+Supposing we want to display a `LineChart` titled "Temperature over Time". Because we're charting a Y over an X, we want an `OrderedDatum`. We could create our own conforming type with `Date` & `Temperature` as `X` and `Y` types respectively, but `TimeSeriesDatum` already provides everything we need. We'll plug our `Temperature` type into this to build our data series.  
+
 The first step is to conform your data types to `DataValue`. Suppose we have a `Temperature` value type:
 
 ```
