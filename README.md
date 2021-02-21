@@ -40,9 +40,9 @@ While you are certainly free to build your own conformances to either datum type
 
 ### Example: "Temperature over Time"
 
-Supposing we want to display a `LineChart` titled "Temperature over Time". Because we're charting a Y over an X, we want an `OrderedDatum`. We could create our own conforming type with `Date` & `Temperature` as `X` and `Y` types respectively, but `TimeSeriesDatum` already provides everything we need. We'll plug our `Temperature` type into this to build our data series.  
+Suppose we want to display a `LineChart` titled "Temperature over Time". Because we're charting a Y over an X, we want an `OrderedDatum`. We could create our own conforming type with `Date` & `Temperature` as `X` and `Y` types respectively, but `TimeSeriesDatum` already provides everything we need. We'll plug our `Temperature` type into this to build our data series.  
 
-The first step is to conform your data types to `DataValue`. Suppose we have a `Temperature` value type:
+The first step is to conform our data types to `DataValue`. Suppose we have a `Temperature` value type:
 
 ```
 struct Temperature {
