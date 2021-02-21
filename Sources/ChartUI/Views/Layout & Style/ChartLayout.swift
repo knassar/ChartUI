@@ -100,3 +100,23 @@ extension View {
     }
 
 }
+
+struct ChartLayout_LibraryContent: LibraryContentProvider {
+
+    @LibraryContentBuilder
+    func modifiers(base: AnyView) -> [LibraryItem] {
+
+        LibraryItem(base.chartInsets(EdgeInsets(top: 10.0, leading: 10.0, bottom: 10.0, trailing: 10.0)),
+                    title: "Chart Insets - by EdgeInsets",
+                    category: .layout)
+
+        LibraryItem(base.chartInsets(.all, 10.0),
+                    title: "Chart Insets - by Edge",
+                    category: .layout)
+
+        LibraryItem(base.chartInsets(10.0),
+                    title: "Chart Insets - Uniform",
+                    category: .layout)
+    }
+
+}

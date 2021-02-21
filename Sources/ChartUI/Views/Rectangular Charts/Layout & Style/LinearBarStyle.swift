@@ -98,9 +98,9 @@ private struct LinearBarsStyleWrapper<StyleValue>: ViewModifier {
 extension View {
 
     // TODO
-//    public func barChart(orientation: LinearBarsStyle.Orientation) -> some View {
-//        self.modifier(LinearBarsStyleWrapper(value: orientation, keyPath: \.orientation))
-//    }
+    //    public func barChart(orientation: LinearBarsStyle.Orientation) -> some View {
+    //        self.modifier(LinearBarsStyleWrapper(value: orientation, keyPath: \.orientation))
+    //    }
 
 
     /// Sets the spacing between bars for a `BarChart`
@@ -161,6 +161,22 @@ extension View {
     /// - Returns: A modified view
     public func barChart<ID: Hashable>(width: CGFloat, for segmentId: ID) -> some View {
         self.modifier(LinearBarsStyleWrapper(segmentId: AnyHashable(segmentId), value: .constant(width), keyPath: \.width))
+    }
+
+}
+
+struct LinearBarStyle_LibraryContent: LibraryContentProvider {
+
+    @LibraryContentBuilder
+    func modifiers(base: AnyView) -> [LibraryItem] {
+
+        LibraryItem(base.barChart(barSpacing: 8.0),
+                    title: "Bar Chart Explicit Bar Spacing",
+                    category: .effect)
+
+        LibraryItem(base.barChart(width: 16.0),
+                    title: "Bar Chart Explicit Bar Width",
+                    category: .effect)
     }
 
 }

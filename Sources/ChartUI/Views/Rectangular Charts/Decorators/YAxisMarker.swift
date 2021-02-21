@@ -68,6 +68,19 @@ public struct YAxisMarker: PointDecorator {
     }
 }
 
+struct YAxisMarker_LibraryContent: LibraryContentProvider {
+
+    @LibraryContentBuilder
+    var views: [LibraryItem] {
+
+        LibraryItem(YAxisMarker(.thruRange, appliesTo: .all),
+                    title: "Y-Axis Marker Decorator",
+                    category: .other)
+
+    }
+
+}
+
 struct YAxisMarker_Previews: PreviewProvider {
     static var previews: some View {
         LineChart(data: sampleTimeSeries, trimmedTo: .previousWeek, underlay: ZStack {

@@ -63,6 +63,18 @@ public struct RingChart<Underlay: View, Overlay: View>: View {
 
 }
 
+struct RingChart_LibraryContent: LibraryContentProvider {
+
+    @LibraryContentBuilder
+    var views: [LibraryItem] {
+        LibraryItem(
+            RingChart(data: sampleCalendarData),
+            category: .other
+            )
+    }
+
+}
+
 struct RingChart_Previews: PreviewProvider {
 
     static var toggle = true

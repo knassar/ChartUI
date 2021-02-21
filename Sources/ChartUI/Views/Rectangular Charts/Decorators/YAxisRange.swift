@@ -104,6 +104,19 @@ public struct YAxisRange: View {
 
 }
 
+struct YAxisRange_LibraryContent: LibraryContentProvider {
+
+    @LibraryContentBuilder
+    var views: [LibraryItem] {
+
+        LibraryItem(YAxisRange(10...20),
+                    title: "Y-Axis Range Decorator",
+                    category: .other)
+
+    }
+
+}
+
 struct YAxisRange_Previews: PreviewProvider {
     static var previews: some View {
         LineChart(data: sampleTimeSeries, trimmedTo: .previousWeek, underlay: ZStack {

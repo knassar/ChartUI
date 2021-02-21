@@ -126,6 +126,19 @@ public struct Origin: View {
 
 }
 
+struct Origin_LibraryContent: LibraryContentProvider {
+
+    @LibraryContentBuilder
+    var views: [LibraryItem] {
+
+        LibraryItem(Origin(),
+                    title: "Origin Decorator",
+                    category: .other)
+
+    }
+
+}
+
 struct Origin_Previews: PreviewProvider {
     static var previews: some View {
         VStack {

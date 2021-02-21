@@ -170,3 +170,59 @@ extension View {
     }
 
 }
+
+struct RectangularChartStyle_LibraryContent: LibraryContentProvider {
+
+    @LibraryContentBuilder
+    func modifiers(base: AnyView) -> [LibraryItem] {
+
+        // grids
+        LibraryItem(base.rectChart(xAxisGrid: XAxisGrid(spacing: 10)),
+                    title: "Rect Chart X-Axis Grid",
+                    category: .other)
+
+        LibraryItem(base.rectChart(yAxisGrid: YAxisGrid(spacing: 10)),
+                    title: "Rect Chart Y-Axis Grid",
+                    category: .other)
+
+        // origins
+        LibraryItem(base.rectChart(yOriginMark: .line(width: 1)),
+                    title: "Rect Chart Y-Origin Mark",
+                    category: .effect)
+
+        LibraryItem(base.rectChart(yOriginColor: .red),
+                    title: "Rect Chart Y-Origin Color",
+                    category: .effect)
+
+        LibraryItem(base.rectChart(xOriginMark: .line(width: 1)),
+                    title: "Rect Chart X-Origin Mark",
+                    category: .effect)
+
+        LibraryItem(base.rectChart(xOriginColor: .green),
+                    title: "Rect Chart X-Origin Color",
+                    category: .effect)
+
+        LibraryItem(base.rectChart(originMark: .line(width: 1)),
+                    title: "Rect Chart Origin Mark",
+                    category: .effect)
+
+        LibraryItem(base.rectChart(originColor: .gray),
+                    title: "Rect Chart Origin Color",
+                    category: .effect)
+
+        // ranges
+        LibraryItem(base.rectChartRange(fill: Color.blue.opacity(0.2)),
+                    title: "Rect Chart Range Fill Color",
+                    category: .effect)
+
+        LibraryItem(base.rectChartRange(stroke: .blue),
+                    title: "Rect Chart Range Stroke Color",
+                    category: .effect)
+
+        LibraryItem(base.rectChartRange(strokeWidth: 1),
+                    title: "Rect Chart Range Stroke Width",
+                    category: .effect)
+
+    }
+
+}

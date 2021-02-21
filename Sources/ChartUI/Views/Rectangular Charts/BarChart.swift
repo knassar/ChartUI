@@ -95,6 +95,20 @@ struct BarChart<P: CategorizedDatum, Underlay: View, Overlay: View>: View {
 
 }
 
+struct BarChart_LibraryContent: LibraryContentProvider {
+
+    @LibraryContentBuilder
+    var views: [LibraryItem] {
+        LibraryItem(
+            BarChart(data: sampleCalendarData,
+                      underlay: ZStack { /* add decorators here */ },
+                      overlay: ZStack { /* add decorators here */ }),
+            category: .other
+            )
+    }
+
+}
+
 struct BarChart_Previews: PreviewProvider {
 
     static var toggle = true

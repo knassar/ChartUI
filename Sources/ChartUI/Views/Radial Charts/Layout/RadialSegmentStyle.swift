@@ -142,3 +142,31 @@ extension View {
     }
 
 }
+
+struct RadialSegmentStyle_LibraryContent: LibraryContentProvider {
+
+    @LibraryContentBuilder
+    func modifiers(base: AnyView) -> [LibraryItem] {
+
+        LibraryItem(base.radialChart(projection: 20),
+                    title: "Radial Seg. Projection",
+                    category: .effect)
+
+        LibraryItem(base.radialChart(outerRadius: RadialSegmentsStyle.Radius.auto),
+                    title: "Radial Seg. Outer Radius Style",
+                    category: .effect)
+
+        LibraryItem(base.radialChart(outerRadius: 100.0),
+                    title: "Radial Seg. Outer Radius",
+                    category: .effect)
+
+        LibraryItem(base.radialChart(innerRadius: RadialSegmentsStyle.Radius.auto),
+                    title: "Radial Seg. Inner Radius Style",
+                    category: .effect)
+
+        LibraryItem(base.radialChart(innerRadius: 60.0),
+                    title: "Radial Seg. Inner Radius",
+                    category: .effect)
+    }
+
+}

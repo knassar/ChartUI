@@ -264,3 +264,36 @@ extension View {
     }
 
 }
+
+struct CategorizedDataStyle_LibraryContent: LibraryContentProvider {
+
+    @LibraryContentBuilder
+    func modifiers(base: AnyView) -> [LibraryItem] {
+
+        LibraryItem(base.chartSegments(zIndex: 0),
+                    title: "Chart Segments Z-Index",
+                    category: .layout)
+
+        LibraryItem(base.chartSegments(fillColor: .blue),
+                    title: "Chart Segments Fill",
+                    category: .effect)
+
+        LibraryItem(base.chartSegments(strokeColor: .white),
+                    title: "Chart Segments Stroke",
+                    category: .effect)
+
+        LibraryItem(base.chartSegments(strokeWidth: 1.0),
+                    title: "Chart Seg. Stroke Width",
+                    category: .effect)
+
+        LibraryItem(base.chartSegments(colorSet: BasicColorSet()),
+                    title: "Chart Segments ColorSet",
+                    category: .effect)
+
+        LibraryItem(base.chartLegend(style: DefaultLegendStyle()),
+                    title: "Chart Legend",
+                    category: .layout)
+
+    }
+
+}

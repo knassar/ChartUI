@@ -70,6 +70,19 @@ public struct PointHighlight: PointDecorator {
     
 }
 
+struct PointHighlight_LibraryContent: LibraryContentProvider {
+
+    @LibraryContentBuilder
+    var views: [LibraryItem] {
+
+        LibraryItem(PointHighlight(appliesTo: .all),
+                    title: "Point Highlight Decorator",
+                    category: .other)
+
+    }
+
+}
+
 struct PointHighlight_Previews: PreviewProvider {
     static var previews: some View {
         LineChart(data: sampleTimeSeries, trimmedTo: .previousWeek, overlay: ZStack {

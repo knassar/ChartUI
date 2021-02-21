@@ -103,6 +103,19 @@ public struct XAxisRange: View {
 
 }
 
+struct XAxisRange_LibraryContent: LibraryContentProvider {
+
+    @LibraryContentBuilder
+    var views: [LibraryItem] {
+
+        LibraryItem(XAxisRange(10...30),
+                    title: "X-Axis Range Decorator",
+                    category: .other)
+
+    }
+
+}
+
 struct XAxisRange_Previews: PreviewProvider {
     static var previews: some View {
         LineChart(data: sampleTimeSeries, trimmedTo: .previousWeek, underlay: ZStack {

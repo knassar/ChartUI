@@ -105,6 +105,20 @@ public struct LineChart<P: OrderedDatum, Underlay: View, Overlay: View>: View {
 
 }
 
+struct LineChart_LibraryContent: LibraryContentProvider {
+
+    @LibraryContentBuilder
+    var views: [LibraryItem] {
+        LibraryItem(
+            LineChart(data: sampleTimeSeries,
+                      underlay: ZStack { /* add decorators here */ },
+                      overlay: ZStack { /* add decorators here */ }),
+            category: .other
+            )
+    }
+
+}
+
 struct LineChart_Previews: PreviewProvider {
 
     static var temperatureData: DataSeries<TimeSeriesDatum<Temperature>> {

@@ -63,6 +63,18 @@ public struct PieChart<Underlay: View, Overlay: View>: View {
 
 }
 
+struct PieChart_LibraryContent: LibraryContentProvider {
+
+    @LibraryContentBuilder
+    var views: [LibraryItem] {
+        LibraryItem(
+            PieChart(data: sampleCalendarData),
+            category: .other
+            )
+    }
+
+}
+
 struct PieChart_Previews: PreviewProvider {
 
     static var toggle = true

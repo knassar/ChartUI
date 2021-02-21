@@ -4,7 +4,7 @@ A pure-SwiftUI lightweight charting library.
 
 This project has the following goals:
 
-1. **Adhere to SwiftUI API paradigms**: Be as "SwiftUI-native" as possible, not just in implementation purity, but also in "feel".
+1. **Adhere to SwiftUI API paradigms**: Be as "SwiftUI-native" as possible, not just in implementation purity, but also in "feel". Supports discoverability through Xcode Library.
 2. **Customization via Composition**: Provide a rich toolbox of highly-composable elements.
 3. **Maximize Type-fidelity throughout the API**: Specify chart properties in data-terms, to minimize conversions from data-space to chart-space  
 4. **Make Pretty (and Useful!) Charts** 

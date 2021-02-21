@@ -88,3 +88,28 @@ extension View {
     }
 
 }
+
+struct LineChartStyle_LibraryContent: LibraryContentProvider {
+
+    @LibraryContentBuilder
+    func modifiers(base: AnyView) -> [LibraryItem] {
+
+        LibraryItem(base.lineChart(lineColor: .blue),
+                    title: "Line Chart Line Color",
+                    category: .effect)
+
+        LibraryItem(base.lineChart(lineEdgeColor: .white),
+                    title: "Line Chart Edge Color",
+                    category: .effect)
+
+        LibraryItem(base.lineChart(lineEdgeWidth: 1.0),
+                    title: "Line Chart Edge Width",
+                    category: .effect)
+
+        LibraryItem(base.lineChart(lineWidth: 1.0),
+                    title: "Line Chart Line Width",
+                    category: .effect)
+
+    }
+
+}

@@ -68,6 +68,19 @@ public struct XAxisMarker: PointDecorator {
     }
 }
 
+struct XAxisMarker_LibraryContent: LibraryContentProvider {
+
+    @LibraryContentBuilder
+    var views: [LibraryItem] {
+
+        LibraryItem(XAxisMarker(.thruRange, appliesTo: .all),
+                    title: "X-Axis Marker Decorator",
+                    category: .other)
+
+    }
+
+}
+
 struct XAxisMarker_Previews: PreviewProvider {
     static var previews: some View {
         LineChart(data: sampleTimeSeries, trimmedTo: .previousWeek, underlay: ZStack {
