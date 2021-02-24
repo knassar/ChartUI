@@ -27,25 +27,27 @@ public struct LineChartLayoutComposer<Underlay: View, Content: View>: View {
     @Environment(\.chartLayout)
     private var chartLayout: ChartLayout
 
+    @Environment(\.lineChartStyle)
+    private var lineChartStyle: LineChartStyle
+
     public var body: some View {
         let rectLayout = self.rectLayout()
         let lineLayout = self.lineLayout(with: rectLayout)
-        ForEach(lineLayout.visibleSegments) { segment in
-            underlay
-                .orderedChartData(data)
-                .chartLayout(localFrame: localFrame)
-                .environment(\.lineChartSegment, segment)
-                .environment(\.lineChartLayout, lineLayout)
-                .environment(\.rectangularChartLayout, rectLayout)
+        ZStack {
+            ForEach(lineLayout.visibleSegments) { segment in
+                underlay
+                    .environment(\.lineChartSegment, segment)
+            }
+            ForEach(lineLayout.visibleSegments) { segment in
+                content
+                    .environment(\.lineChartSegment, segment)
+            }
         }
-        ForEach(lineLayout.visibleSegments) { segment in
-            content
-                .orderedChartData(data)
-                .chartLayout(localFrame: localFrame)
-                .environment(\.lineChartSegment, segment)
-                .environment(\.lineChartLayout, lineLayout)
-                .environment(\.rectangularChartLayout, rectLayout)
-        }
+        .orderedChartData(data)
+        .attachScrollInteraction(with: offsetBinding)
+        .chartLayout(localFrame: localFrame)
+        .environment(\.lineChartLayout, lineLayout)
+        .environment(\.rectangularChartLayout, rectLayout)
     }
 
     private var localFrame: CGRect {
@@ -57,8 +59,16 @@ public struct LineChartLayoutComposer<Underlay: View, Content: View>: View {
     }
 
     private func lineLayout(with rectLayout: RectangularChartLayout) -> LineChartLayout {
-        LineChartLayout(data: data, xRange: xRange, rectLayout: rectLayout)
+        LineChartLayout(data: data, xRange: xRange, offset: offsetBinding.wrappedValue, rectLayout: rectLayout)
     }
+
+    private var offsetBinding: Binding<CGFloat> {
+        guard lineChartStyle.scrollEnabled else { return .constant(1) }
+        return lineChartStyle.scrollOffsetBinding ?? $defaultScrollOffset
+    }
+
+    @State
+    private var defaultScrollOffset: CGFloat = 1
 
 }
 
@@ -107,6 +117,9 @@ public struct LineChartLayout {
     private var layoutToDataTransformX: (CGFloat) -> CGFloat = { $0 }
     private var visibleRangeX: ClosedRange<CGFloat> = 0...0
 
+    public private(set) var scrollOffset: CGFloat = 1
+    public private(set) var maxScrollOffset: CGFloat = 80
+
     public var insetFrame: CGRect {
         CGRect(x: localFrame.minX + insets.leading,
                y: localFrame.minY + insets.top,
@@ -134,11 +147,12 @@ public struct LineChartLayout {
 
     }
 
-    init(data: AnyDataSeries, xRange: Range<CGFloat>?, rectLayout: RectangularChartLayout) {
+    init(data: AnyDataSeries, xRange: Range<CGFloat>?, offset: CGFloat, rectLayout: RectangularChartLayout) {
         self.absoluteDataBounds = rectLayout.absoluteDataBounds
         self.insets = rectLayout.insets
         self.localFrame = rectLayout.localFrame
         self.xRange = xRange
+        self.scrollOffset = offset
         self.recalculate(with: data, in: rectLayout)
     }
 
@@ -159,17 +173,30 @@ extension LineChartLayout {
     static let pointsPerFrame = 500
 
     private mutating func recalculate(with data: AnyDataSeries, in rectLayout: RectangularChartLayout) {
+
+        // *** These values build upon each other, so order matters here *** 
+
+        // 1. compute the horizontal units
         let available = insetFrame.size
         let unitX = available.width / (dataEnd - dataStart)
+
+        // 2. Adjust the visible range according to the scroll offset
+        self.maxScrollOffset = absoluteDataBounds.size.width * unitX - available.width * 0.75
+        let scroll = (maxScrollOffset - scrollOffset * maxScrollOffset) / unitX
+        self.xRange = (dataStart - scroll)..<(dataEnd - scroll)
+
+        // 3. setup the transforms based on visible range
         let start = self.dataStart
         self.dataToLayoutTransformX = { ($0 - start) * unitX }
 
+        // 4. compute the segment frames
         let dataCount = data.count
         // the data chunked into `frameWidth`-sized arrays
         self.segments = stride(from: 0, to: dataCount, by: Self.pointsPerFrame).map {
             lineFrame(at: $0, through: min($0 + Self.pointsPerFrame + 1, dataCount), from: data, in: rectLayout)
         }
 
+        // 5. set the overall bounds in view-units
         self.xDataBoundsWithInsets = (dataStart - insets.leading / unitX)...(dataEnd + insets.trailing / unitX)
     }
 

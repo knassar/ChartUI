@@ -31,7 +31,10 @@ public struct LineChartStyle {
     public fileprivate(set) var lineWidth: CGFloat = 2
     public fileprivate(set) var lineEdge: Color? = nil
     public fileprivate(set) var lineEdgeWidth: CGFloat = 1
-    
+
+    var scrollEnabled: Bool = false
+    var scrollOffsetBinding: Binding<CGFloat>?
+
 }
 
 private struct LineChartStyleWrapper<StyleValue>: ViewModifier {
@@ -47,6 +50,10 @@ private struct LineChartStyleWrapper<StyleValue>: ViewModifier {
             style[keyPath: keyPath] = value
             return style
         }
+    }
+
+    init(modifier: @escaping (LineChartStyle) -> LineChartStyle) where StyleValue == Never {
+        self.modifier = modifier
     }
 
     func body(content: Content) -> some View {
@@ -85,6 +92,25 @@ extension View {
     /// - Returns: A modified view
     public func lineChart(lineWidth: CGFloat) -> some View {
         self.modifier(LineChartStyleWrapper(value: lineWidth, keyPath: \.lineWidth))
+    }
+
+}
+
+// MARK: - Line Chart Scroll Modifiers
+
+extension View {
+
+    public func lineChart(scrollEnabled: Bool) -> some View {
+        self.modifier(LineChartStyleWrapper(value: scrollEnabled, keyPath: \.scrollEnabled))
+    }
+
+    public func lineChart(scrollOffset: Binding<CGFloat>? = nil) -> some View {
+        self.modifier(LineChartStyleWrapper(modifier: { style in
+            var style = style
+            style.scrollEnabled = true
+            style.scrollOffsetBinding = scrollOffset
+            return style
+        }))
     }
 
 }

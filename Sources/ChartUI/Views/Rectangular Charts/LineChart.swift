@@ -19,12 +19,6 @@ public struct LineChart<P: OrderedDatum, Underlay: View, Overlay: View>: View {
 
     private var overlay: Overlay?
 
-    @Environment(\.lineChartStyle)
-    private var lineStyle: LineChartStyle
-
-    @Environment(\.rectangularChartStyle)
-    private var rectChartStyle: RectangularChartStyle
-
     /// Initialize a LineChart view
     /// - Parameters:
     ///   - data: A `DataSeries` whose data type is an `OrderedDatum`
@@ -116,6 +110,7 @@ public struct LineChart<P: OrderedDatum, Underlay: View, Overlay: View>: View {
                         .foregroundColor(edgeColor)
                 }
             }
+
         }
     }
 
@@ -201,10 +196,18 @@ struct LineChart_Previews: PreviewProvider {
         @State
         var insets: CGFloat = 0.2
 
+        @State
+        var scrollOffset: CGFloat = 1
+
         var body: some View {
             VStack {
                 controlPanel
                 Spacer()
+                HStack {
+                    Text("scrolled to: \(scrollOffset)")
+                        .font(.caption)
+                    Spacer()
+                }
                 LineChart(data: sampleTimeSeries, trimmedTo: xRange, underlay: ZStack {
                     if pointHighlights {
                         PointHighlight(appliesTo: .each(sampleTimeSeries.allY { $0 > 50 }))
@@ -251,6 +254,7 @@ struct LineChart_Previews: PreviewProvider {
                 .rectChart(xOriginMark: .tic(length: 5, width: 2))
                 .rectChart(yOriginMark: .tic(length: 1, width: 2))
                 .rectChart(originColor: .purple)
+                .lineChart(scrollOffset: $scrollOffset)
                 .chartInsets(.all, insets * 50)
                 .frame(height: 120)
                 .border(Color.gray)
@@ -318,6 +322,7 @@ struct LineChart_Previews: PreviewProvider {
                 .rectChart(xAxisGrid: XAxisGrid(origin: .today, spacing: TimeInterval.days(1)))
                 .rectChart(yAxisGrid: YAxisGrid(spacing: Temperature(celsius: 10)))
                 .chartInsets(.all, insets * 50)
+                .lineChart(scrollEnabled: true)
                 .frame(height: 150)
                 .border(Color.gray)
             }
