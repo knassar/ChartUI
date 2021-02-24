@@ -63,7 +63,6 @@ public struct LineChartLayoutComposer<Underlay: View, Content: View>: View {
     }
 
     private var offsetBinding: Binding<CGFloat> {
-        guard lineChartStyle.scrollEnabled else { return .constant(1) }
         return lineChartStyle.scrollOffsetBinding ?? $defaultScrollOffset
     }
 

@@ -197,6 +197,9 @@ struct LineChart_Previews: PreviewProvider {
         var insets: CGFloat = 0.2
 
         @State
+        var scrollOn: Bool = true
+
+        @State
         var scrollOffset: CGFloat = 1
 
         var body: some View {
@@ -254,7 +257,7 @@ struct LineChart_Previews: PreviewProvider {
                 .rectChart(xOriginMark: .tic(length: 5, width: 2))
                 .rectChart(yOriginMark: .tic(length: 1, width: 2))
                 .rectChart(originColor: .purple)
-                .lineChart(scrollOffset: $scrollOffset)
+                .lineChart(scrollOffset: $scrollOffset, enabled: scrollOn)
                 .chartInsets(.all, insets * 50)
                 .frame(height: 120)
                 .border(Color.gray)
@@ -322,7 +325,7 @@ struct LineChart_Previews: PreviewProvider {
                 .rectChart(xAxisGrid: XAxisGrid(origin: .today, spacing: TimeInterval.days(1)))
                 .rectChart(yAxisGrid: YAxisGrid(spacing: Temperature(celsius: 10)))
                 .chartInsets(.all, insets * 50)
-                .lineChart(scrollEnabled: true)
+                .lineChart(scrollEnabled: scrollOn)
                 .frame(height: 150)
                 .border(Color.gray)
             }
@@ -356,6 +359,8 @@ struct LineChart_Previews: PreviewProvider {
                     toggle("Points", $pointHighlights)
                     Spacer()
                     toggle("Marks", $marks)
+                    Spacer()
+                    toggle("Scroll", $scrollOn)
                 }
             }
         }

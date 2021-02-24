@@ -176,6 +176,40 @@ var body: some View {
 
 If this is starting too look too complicated, remember that all Decorators and modifiers in ChartUI follow SwiftUI patterns, so you can use the same strategies for extracting to subviews, scoping of modifiers, and bundling modifiers into custom methods that you would use with any SwiftUI view. 
 
+## Interactions
+
+`LineChart` supports an interactive scroll over the absolute extents of the data. Activate scrolling using either the `lineChart(scrollEnabled:)` or `lineChart(scrollOffset:enabled:)` modifiers. The first activates and deactivates scrolling. With the second, you can activate scrolling in a line chart and bind the scroll offset to the provided `scrollOffset` binding. This can be used to observe the scroll position, or integrate the scroll interaction with other views, including the `MiniMap` interactive view, as in the following example:
+
+```
+@State
+var xRange: Range<Date> = .previousWeek
+
+@State
+var scroll: CGFloat = 1
+
+var body: some View {
+    VStack {
+        
+        // Read-out the scroll position in real-time
+        Text("scrolled to: \(scroll)")
+            .font(.caption)
+
+        // Creates a mini-map interactive navigation with a "scroll thumb" linked to the main chart below
+        MiniMap(data: myDataSeries, xRange: xRange, scrollOffset: $scroll) 
+            .frame(height: 24)
+
+        LineChart(data: myDataSeries, trimmedTo: xRange)
+        
+            // Activates scrolling and associates with the scroll state property
+            .lineChart(scrollOffset: $scroll)
+    
+            .rectChart(xAxisGrid: XAxisGrid(origin: .today, spacing: TimeInterval.days(1)))
+            .rectChart(yAxisGrid: YAxisGrid(origin: 0, spacing: 10))
+            .frame(height: 160)
+    }
+}
+```
+
 ## Future Goals
 
 Some things I want to achieve (and/or have plans for), in no particular order: 
@@ -185,7 +219,6 @@ Some things I want to achieve (and/or have plans for), in no particular order:
 * Interactions
   - Data Loupe
   - Navigation Links
-  - X-range scrolling for `LineChart`
   - Custom Actions
 * Unit testing for the Data & Layout layers
 

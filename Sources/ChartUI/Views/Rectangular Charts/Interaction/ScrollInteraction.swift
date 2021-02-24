@@ -25,6 +25,7 @@ struct ScrollInteraction: ViewModifier {
         content
             .gesture(ScrollGesture(offset: offset,
                                    state: $scrollGestureState,
+                                   isEnabled: lineChartStyle.scrollEnabled,
                                    layout: layout))
     }
 
@@ -46,11 +47,14 @@ struct ScrollGesture: Gesture {
     @Binding
     private var state: State
 
+    private var isEnabled: Bool
+
     private var layout: LineChartLayout
 
-    init(offset: Binding<CGFloat>, state: Binding<State>, layout: LineChartLayout) {
+    init(offset: Binding<CGFloat>, state: Binding<State>, isEnabled: Bool, layout: LineChartLayout) {
         self._scrollOffset = offset
         self._state = state
+        self.isEnabled = isEnabled
         self.layout = layout
     }
 
@@ -65,6 +69,7 @@ struct ScrollGesture: Gesture {
     }
 
     private func scrollChanged(_ value: DragGesture.Value) {
+        guard isEnabled else { return }
         if state.offsetAtGestureStart.isNaN {
             state.offsetAtGestureStart = layout.scrollOffset
         }
@@ -73,6 +78,7 @@ struct ScrollGesture: Gesture {
     }
 
     private func scrollEnded(_ value: DragGesture.Value) {
+        guard isEnabled else { return }
         if value.translation.width == 0 {
             switch value.startLocation.x {
             case layout.localFrame.minX...16:
