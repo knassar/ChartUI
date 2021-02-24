@@ -180,7 +180,7 @@ extension LineChartLayout {
         let unitX = available.width / (dataEnd - dataStart)
 
         // 2. Adjust the visible range according to the scroll offset
-        self.maxScrollOffset = absoluteDataBounds.size.width * unitX - available.width * 0.75
+        self.maxScrollOffset = (dataEnd - min(absoluteDataBounds.start, dataStart)) * unitX - available.width
         let scroll = (maxScrollOffset - scrollOffset * maxScrollOffset) / unitX
         self.xRange = (dataStart - scroll)..<(dataEnd - scroll)
 
@@ -213,6 +213,14 @@ extension LineChartLayout {
                               width: last.xValue - first.xValue,
                               height: absoluteDataBounds.maximum)
 
+        var position = Segment.Position.middle
+        if index == 0 {
+            position.insert(.first)
+        }
+        if through == data.count {
+            position.insert(.last)
+        }
+
         let rect = CGRect(x: xInLayout(fromDataX: absRect.origin.x),
                           y: rectLayout.yInLayout(fromDataY: absRect.origin.y),
                           width: xInLayout(fromDataX: last.xValue) - xInLayout(fromDataX: first.xValue),
@@ -221,14 +229,6 @@ extension LineChartLayout {
         let relativePoints = frameData.map { datum in
             CGPoint(x: (datum.xValue - absRect.minX) / absRect.width,
                     y: 1 - (datum.yValue - absRect.minY) / absRect.height)
-        }
-
-        var position = Segment.Position.middle
-        if index == 0 {
-            position.insert(.first)
-        }
-        if through == data.count {
-            position.insert(.last)
         }
 
         let isVisisble = (dataStart...dataEnd).overlaps(first.xValue...last.xValue)

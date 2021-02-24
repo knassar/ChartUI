@@ -118,9 +118,10 @@ extension View {
     /// When scrolling is enabled for a `LineChart`, dragging across the content of the chart will scroll the visible range of the chart over the absolute extents of the data. Areas at each end of the chart will also respond to touches, scrolling the chart to the absolute start or end of the available data, respectively.
     ///
     /// This modifier activates scrolling for a chart, binding the chart's scrollOffset to the provided value.
+    /// The scroll offset is given in terms of a percentage over the absolute data range, allowing application of the scroll value to views outside of the chart's particular layout. For example, by assigning the same `scrollOffset` binding to two charts showing similar data, their scrolling will be synchronized.
     /// Because the `scrollOffset` binding is read/write, you can use this modifier to enable scrolling while also observing and controlling the scroll position of the affected chart. This can be used to associate the chart's scroll position with an auxiliary navigation aid, such as a `ScrollThumb` decorator, or displaying different data states in an adjacent view based on the scrolled position.
     /// - Parameters:
-    ///   - scrollOffset: A binding to a `CGFloat` value between `0` and `1`. The scroll offset is given in terms of a percentage over the absolute data range, allowing application of the scroll value to views outside of the chart's particular layout.
+    ///   - scrollOffset: A binding to a `CGFloat` value between `0` and `1`.
     ///   - enabled: An optional boolean to enable or disable direct scrolling gestures. Defaults to true.
     /// - Returns: A modified view.
     public func lineChart(scrollOffset: Binding<CGFloat>? = nil, enabled: Bool = true) -> some View {

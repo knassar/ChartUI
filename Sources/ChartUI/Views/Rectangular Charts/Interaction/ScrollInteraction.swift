@@ -65,7 +65,7 @@ struct ScrollGesture: Gesture {
     }
 
     var maxOverscroll: CGFloat {
-        (layout.localFrame.width / 2) / layout.maxScrollOffset
+        (layout.localFrame.width / 2) / max(layout.localFrame.width / 2, layout.maxScrollOffset)
     }
 
     private func scrollChanged(_ value: DragGesture.Value) {

@@ -133,7 +133,7 @@ public struct MiniMap<P: OrderedDatum, Underlay: View, Overlay: View>: View {
         }
 
         private var rangeWidth: CGFloat {
-            lineLayout.xInLayout(fromDataX: range.upperBound.dataSeriesValue) - lineLayout.xInLayout(fromDataX: range.lowerBound.dataSeriesValue) + rectLayout.insets.trailing - 1
+            lineLayout.xInLayout(fromDataX: range.upperBound.dataSeriesValue) - lineLayout.xInLayout(fromDataX: range.lowerBound.dataSeriesValue)
         }
 
         private var thumbMinX: CGFloat {
@@ -157,7 +157,7 @@ public struct MiniMap<P: OrderedDatum, Underlay: View, Overlay: View>: View {
                     if offsetAtGestureStart.isNaN {
                         offsetAtGestureStart = scrollOffset
                     }
-                    scrollOffset = offsetAtGestureStart + value.translation.width / maxScrollOffset
+                    scrollOffset = offsetAtGestureStart + (value.translation.width - rangeWidth / 2) / maxScrollOffset
                 }
                 .onEnded { _ in
                     scrollOffset = min(max(0, scrollOffset), 1)

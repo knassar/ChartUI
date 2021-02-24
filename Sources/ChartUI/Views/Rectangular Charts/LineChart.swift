@@ -262,7 +262,7 @@ struct LineChart_Previews: PreviewProvider {
                 .frame(height: 120)
                 .border(Color.gray)
 
-                LineChart(data: sampleShortTimeSeries, trimmedTo: xRange, underlay: ZStack {
+                LineChart(data: sampleShortTimeSeries, underlay: ZStack {
                     if ranges {
                         XAxisRange(Date().dayStart.dayBefore...Date().dayStart)
                             .rectChartRange(stroke: .blue)
@@ -302,7 +302,7 @@ struct LineChart_Previews: PreviewProvider {
                 .rectChart(originMark: .line(width: 2))
                 .rectChart(originColor: .purple)
 
-                LineChart(data: temperatureData, trimmedTo: xRange, underlay: ZStack {
+                LineChart(data: temperatureData, underlay: ZStack {
                     if ranges {
                         YAxisRange(...tooCold)
                             .rectChartRange(fill: Color.blue.opacity(0.2))

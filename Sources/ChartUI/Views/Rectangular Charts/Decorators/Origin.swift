@@ -36,6 +36,10 @@ public enum OriginMark {
 /// Renders a specified mark for the X, Y, or both origins in a rectangular chart.
 public struct Origin: View {
 
+    public init() {
+        
+    }
+
     @Environment(\.rectangularChartLayout)
     private var layout: RectangularChartLayout
 
