@@ -129,15 +129,15 @@ public struct MiniMap<P: OrderedDatum, Underlay: View, Overlay: View>: View {
         private var lineLayout: LineChartLayout
 
         private var maxScrollOffset: CGFloat {
-            rectLayout.localFrame.width - rangeWidth
+            lineLayout.xInLayout(fromDataX: max(lineLayout.absoluteDataBounds.end, range.upperBound.dataSeriesValue)) - lineLayout.xInLayout(fromDataX: min(lineLayout.absoluteDataBounds.start, range.lowerBound.dataSeriesValue)) - thumbWidth
         }
 
-        private var rangeWidth: CGFloat {
+        private var thumbWidth: CGFloat {
             lineLayout.xInLayout(fromDataX: range.upperBound.dataSeriesValue) - lineLayout.xInLayout(fromDataX: range.lowerBound.dataSeriesValue)
         }
 
         private var thumbMinX: CGFloat {
-            lineLayout.xInLayout(fromDataX: range.lowerBound.dataSeriesValue) - (maxScrollOffset - scrollOffset * maxScrollOffset) - 1
+            lineLayout.xInLayout(fromDataX: range.lowerBound.dataSeriesValue) - (maxScrollOffset - scrollOffset * maxScrollOffset)
         }
 
         var body: some View {
@@ -146,7 +146,7 @@ public struct MiniMap<P: OrderedDatum, Underlay: View, Overlay: View>: View {
                     .foregroundColor(Color.white.opacity(0.001))
                     .gesture(tap)
 
-                DefaultThumb(x: thumbMinX, size: CGSize(width: rangeWidth, height: rectLayout.localFrame.height))
+                DefaultThumb(x: thumbMinX, size: CGSize(width: thumbWidth, height: rectLayout.localFrame.height))
                     .gesture(drag)
             }
         }
@@ -157,7 +157,7 @@ public struct MiniMap<P: OrderedDatum, Underlay: View, Overlay: View>: View {
                     if offsetAtGestureStart.isNaN {
                         offsetAtGestureStart = scrollOffset
                     }
-                    scrollOffset = offsetAtGestureStart + (value.translation.width - rangeWidth / 2) / maxScrollOffset
+                    scrollOffset = offsetAtGestureStart + value.translation.width / maxScrollOffset
                 }
                 .onEnded { _ in
                     scrollOffset = min(max(0, scrollOffset), 1)
@@ -168,7 +168,7 @@ public struct MiniMap<P: OrderedDatum, Underlay: View, Overlay: View>: View {
         private var tap: some Gesture {
             DragGesture(minimumDistance: 0)
                 .onEnded { value in
-                    let offset = (value.startLocation.x - rangeWidth / 2) / maxScrollOffset
+                    let offset = (value.startLocation.x - thumbWidth / 2) / maxScrollOffset
                     scrollOffset = min(max(0, offset), 1)
                     offsetAtGestureStart = .nan
                 }
@@ -221,26 +221,41 @@ struct MiniMap_Previews: PreviewProvider {
         @State
         var scrollEnabled = true
 
+        @State
+        var shortData = true
+
+        var temperatureData: DataSeries<TimeSeriesDatum<Temperature>> {
+            dataSeries(for: timeTemp)
+        }
+
+        var data: DataSeries<TimeSeriesDatum<Double>> {
+            shortData
+                ? DataSeries(data: Array(sampleTimeSeries.data.suffix(18)))
+                : sampleTimeSeries
+        }
+
         var body: some View {
             VStack {
-                Picker("Range", selection: $xRange) {
-                    Text("Year").tag(Range<Date>.previousYear)
-                    Text("3 Months").tag(
-                        Calendar.current.date(byAdding: .month, value: -3, to: .today)!.dayStart..<Date.today.dayAfter
-                    )
-                    Text("Month").tag(Range<Date>.previousMonth)
-                    Text("Week").tag(Range<Date>.previousWeek)
+                HStack {
+                    Picker("Range", selection: $xRange) {
+                        Text("Year").tag(Range<Date>.previousYear)
+                        Text("3 Months").tag(
+                            Calendar.current.date(byAdding: .month, value: -3, to: .today)!.dayStart..<Date.today.dayAfter
+                        )
+                        Text("Month").tag(Range<Date>.previousMonth)
+                        Text("Week").tag(Range<Date>.previousWeek)
+                    }
+                    .padding(.vertical, 8)
+                    .pickerStyle(SegmentedPickerStyle())
+                    toggle("Short Data", $shortData)
                 }
-                .padding(.vertical, 8)
-                .pickerStyle(SegmentedPickerStyle())
-
-                MiniMap(data: sampleTimeSeries, xRange: xRange, scrollOffset: $scroll)
+                MiniMap(data: data, xRange: xRange, scrollOffset: $scroll)
                     .rectChart(xAxisGrid: XAxisGrid(origin: .today, spacing: TimeInterval.days(7)))
                     .chartInsets(.vertical, 8)
                     .frame(height: 24)
                     .border(Color.gray)
 
-                LineChart(data: sampleTimeSeries, trimmedTo: xRange, underlay: ZStack {
+                LineChart(data: data, trimmedTo: xRange, underlay: ZStack {
                     PointHighlight(appliesTo: .each(sampleTimeSeries.allY { $0 > 50 }))
                         .chartPointHighlight(stroke: .purple)
                         .chartPointHighlight(strokeWidth: 1)
