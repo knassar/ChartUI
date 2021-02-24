@@ -182,7 +182,11 @@ extension LineChartLayout {
         // 2. Adjust the visible range according to the scroll offset
         self.maxScrollOffset = (dataEnd - min(absoluteDataBounds.start, dataStart)) * unitX - available.width
         let scroll = (maxScrollOffset - scrollOffset * maxScrollOffset) / unitX
-        self.xRange = (dataStart - scroll)..<(dataEnd - scroll)
+        let scrolledStart = dataStart - scroll
+        let scrolledEnd = dataEnd - scroll
+        if scrolledStart < scrolledEnd {
+            self.xRange = scrolledStart..<scrolledEnd
+        }
 
         // 3. setup the transforms based on visible range
         let start = self.dataStart
@@ -196,7 +200,11 @@ extension LineChartLayout {
         }
 
         // 5. set the overall bounds in view-units
-        self.xDataBoundsWithInsets = (dataStart - insets.leading / unitX)...(dataEnd + insets.trailing / unitX)
+        let leadingEdge = (dataStart - insets.leading / unitX)
+        let trailingEdge = (dataEnd + insets.trailing / unitX)
+        if leadingEdge < trailingEdge {
+            self.xDataBoundsWithInsets = leadingEdge...trailingEdge
+        }
     }
 
     private func lineFrame(at index: Int, through: Int, from data: AnyDataSeries, in rectLayout: RectangularChartLayout) -> Segment {

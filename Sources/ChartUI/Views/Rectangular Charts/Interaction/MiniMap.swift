@@ -237,7 +237,6 @@ struct MiniMap_Previews: PreviewProvider {
                 MiniMap(data: sampleTimeSeries, xRange: xRange, scrollOffset: $scroll)
                     .rectChart(xAxisGrid: XAxisGrid(origin: .today, spacing: TimeInterval.days(7)))
                     .chartInsets(.vertical, 8)
-                    .chartInsets(.horizontal, 0)
                     .frame(height: 24)
                     .border(Color.gray)
 
