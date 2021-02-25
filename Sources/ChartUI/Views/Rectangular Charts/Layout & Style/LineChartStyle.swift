@@ -28,12 +28,36 @@ extension EnvironmentValues {
 public struct LineChartStyle {
 
     public fileprivate(set) var color: Color = .blue
+    public fileprivate(set) var lineFill: Fill = .none
     public fileprivate(set) var lineWidth: CGFloat = 2
     public fileprivate(set) var lineEdge: Color? = nil
     public fileprivate(set) var lineEdgeWidth: CGFloat = 1
 
     var scrollEnabled: Bool = false
     var scrollOffsetBinding: Binding<CGFloat>?
+
+    /// A fill style for the area under the line
+    public enum Fill {
+        case color(Color)
+        case gradient(LinearGradient)
+        case none
+    }
+
+}
+
+public protocol LineFill {
+    var lineFill: LineChartStyle.Fill { get }
+}
+
+extension Color: LineFill {
+
+    public var lineFill: LineChartStyle.Fill { .color(self) }
+
+}
+
+extension Gradient: LineFill {
+
+    public var lineFill: LineChartStyle.Fill { .gradient(LinearGradient(gradient: self, startPoint: .top, endPoint: .bottom)) }
 
 }
 
@@ -71,6 +95,23 @@ extension View {
     /// - Returns: A modified view
     public func lineChart(lineColor color: Color) -> some View {
         self.modifier(LineChartStyleWrapper(value: color, keyPath: \.color))
+    }
+
+    /// Sets a gradient fill style for the area under the line in a `LineChart`
+    ///
+    /// Because the `LineChart` data layout is computed & rendered in horizontal tiling segments, only vertical linear gradients are currently supported. The gradient supplied will always be converted to a `LinearGradient` with a `startPoint: .top` and `endPoint: .bottom`.
+    ///
+    /// - Parameter fill: the base gradient to use to form a top-to-bottom `LinearGradient` for the area under the line.
+    /// - Returns: A modified view
+    public func lineChart(fill: Gradient?) -> some View {
+        return self.modifier(LineChartStyleWrapper(value: fill?.lineFill ?? .none, keyPath: \.lineFill))
+    }
+
+    /// Sets the solid fill color for the area under the line in a `LineChart`
+    /// - Parameter fill: the color for the area under the line
+    /// - Returns: A modified view
+    public func lineChart(fill: Color?) -> some View {
+        return self.modifier(LineChartStyleWrapper(value: fill?.lineFill ?? .none, keyPath: \.lineFill))
     }
 
     /// Sets an outline color for a `LineChart` line
@@ -142,6 +183,13 @@ struct LineChartStyle_LibraryContent: LibraryContentProvider {
 
         LibraryItem(base.lineChart(lineColor: .blue),
                     title: "Line Chart Line Color",
+                    category: .effect)
+
+        LibraryItem(base.lineChart(fill: .blue),
+                    title: "Line Chart Fill Color",
+                    category: .effect)
+        LibraryItem(base.lineChart(fill: Gradient(colors: [.white, .blue])),
+                    title: "Line Chart Fill Gradient",
                     category: .effect)
 
         LibraryItem(base.lineChart(lineEdgeColor: .white),

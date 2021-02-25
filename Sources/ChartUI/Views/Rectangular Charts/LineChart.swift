@@ -132,6 +132,15 @@ public struct LineChart<P: OrderedDatum, Underlay: View, Overlay: View>: View {
 
         var body: some View {
             ZStack {
+                if case let .color(fillColor) = lineStyle.lineFill {
+                    Line(segment: segment, width: lineStyle.lineWidth, fill: true)
+                        .fill()
+                        .foregroundColor(fillColor)
+                } else if case let .gradient(fill) = lineStyle.lineFill {
+                    Line(segment: segment, width: lineStyle.lineWidth, fill: true)
+                        .fill(fill)
+                }
+
                 Line(segment: segment, width: lineStyle.lineWidth)
                     .foregroundColor(lineStyle.color)
 
@@ -316,6 +325,10 @@ struct LineChart_Previews: PreviewProvider {
                     if pointHighlights {
                         PointHighlight(appliesTo: .all)
                         PointHighlight(appliesTo: temperatureData.allY(where: { (tooCold...tooHot).contains($0) }))
+                            .chartPointHighlight(radius: 5)
+                            .chartPointHighlight(fill: .green)
+
+                        PointHighlight(appliesTo: temperatureData.allY(where: { (tooCold...tooHot).contains($0) }))
                             .chartPointHighlight(radius: 8)
                             .chartPointHighlight(fill: nil)
                             .chartPointHighlight(stroke: .green)
@@ -326,6 +339,7 @@ struct LineChart_Previews: PreviewProvider {
                 .rectChart(yAxisGrid: YAxisGrid(spacing: Temperature(celsius: 10)))
                 .chartInsets(.all, insets * 50)
                 .lineChart(scrollEnabled: scrollOn)
+                .lineChart(fill: Gradient(colors: [.white, .blue]))
                 .frame(height: 150)
                 .border(Color.gray)
             }

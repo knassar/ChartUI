@@ -181,17 +181,27 @@ public struct MiniMap<P: OrderedDatum, Underlay: View, Overlay: View>: View {
         var x: CGFloat
         var size: CGSize
 
+        let strokeWidth: CGFloat = 1
+
         var body: some View {
+            RectangularRange(CGRect(x: x, y: 0, width: size.width, height: size.height))
+                .foregroundColor(Color.accentColor.opacity(0.4))
+
             LineSegment(start: CGPoint(x: x, y: 0),
                         end: CGPoint(x: x, y: size.height))
-                .strokeBorder(Color.accentColor, lineWidth: 0.5)
-
-            RectangularRange(CGRect(x: x, y: 0, width: size.width, height: size.height))
-                .foregroundColor(Color.accentColor.opacity(0.2))
+                .strokeBorder(Color.white, lineWidth: strokeWidth + 2)
 
             LineSegment(start: CGPoint(x: x + size.width, y: 0),
                         end: CGPoint(x: x + size.width, y: size.height))
-                .strokeBorder(Color.accentColor, lineWidth: 0.5)
+                .strokeBorder(Color.white, lineWidth: strokeWidth + 2)
+
+            LineSegment(start: CGPoint(x: x, y: 0),
+                        end: CGPoint(x: x, y: size.height))
+                .strokeBorder(Color.accentColor, lineWidth: strokeWidth)
+
+            LineSegment(start: CGPoint(x: x + size.width, y: 0),
+                        end: CGPoint(x: x + size.width, y: size.height))
+                .strokeBorder(Color.accentColor, lineWidth: strokeWidth)
         }
 
     }
@@ -252,6 +262,7 @@ struct MiniMap_Previews: PreviewProvider {
                 MiniMap(data: data, xRange: xRange, scrollOffset: $scroll)
                     .rectChart(xAxisGrid: XAxisGrid(origin: .today, spacing: TimeInterval.days(7)))
                     .chartInsets(.vertical, 8)
+                    .lineChart(fill: Gradient(colors: [.blue, .white]))
                     .frame(height: 24)
                     .border(Color.gray)
 
