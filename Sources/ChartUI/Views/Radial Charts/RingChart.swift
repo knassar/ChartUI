@@ -88,6 +88,9 @@ struct RingChart_Previews: PreviewProvider {
         @State
         var dataToggle = true
 
+        @State
+        var touchedDatumId: AnyHashable?
+
         var body: some View {
             VStack {
                 Spacer()
@@ -95,7 +98,13 @@ struct RingChart_Previews: PreviewProvider {
                 RingChart(data: dataToggle ? sampleCalendarData : sampleCalendarData2)
                     .chartInsets(.trailing, 5)
                     .chartInsets(.leading, 100)
+                    .chartInsets(.vertical, 50)
                     .chartSegments(strokeWidth: 1)
+                    .radialChart(innerRadius: 60, for: touchedDatumId)
+                    .radialChart(outerRadius: 110, for: touchedDatumId)
+                    .onChartSegmentMomentaryTouchGesture { datum in
+                        touchedDatumId = datum?.id
+                    }
                     .chartLegend(style: DefaultLegendStyle(nameMapper: sampleCalendarDataNameMapper))
                 Spacer()
                 Text("RingChart with an Inline Legend")
@@ -104,6 +113,8 @@ struct RingChart_Previews: PreviewProvider {
                     .chartSegments(strokeWidth: 1)
                     .radialChart(projection: 20, for: sampleCalendarData.data[8].id)
                     .radialChart(outerRadius: .proportional)
+                    .chartSegment(strokeColor: .accentColor, for: touchedDatumId)
+                    .chartSegment(strokeWidth: 2, for: touchedDatumId)
                     .chartLegend(style: InlineLegendStyle())
                 Spacer()
                 Button(action: { dataToggle.toggle() }, label: {

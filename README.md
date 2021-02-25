@@ -210,6 +210,36 @@ var body: some View {
 }
 ```
 
+Categorized Data charts support the `onChartSegmentTapGesture(_:)` and `onChartSegmentMomentaryTouchGesture(_:)` modifiers, which attach a custom callback to the individual chart segments, allowing you to perform custom actions on individual data segments:
+
+```
+@State
+var touchedDatumId: AnyHashable?
+
+var body: some View {
+    VStack {
+        RingChart(data: sampleCalendarData)
+            .chartInsets(.trailing, 5)
+            .chartInsets(.leading, 100)
+            .chartInsets(.vertical, 50)
+            .chartSegments(strokeWidth: 1)
+            
+            // increase the inner and outer radii for the touched segment
+            .radialChart(innerRadius: 60, for: touchedDatumId)
+            .radialChart(outerRadius: 110, for: touchedDatumId)
+            
+            // set the touchedDatumId when touched, and unset when released 
+            .onChartSegmentMomentaryTouchGesture { datum in
+                touchedDatumId = datum?.id
+            }
+            
+            // the touch gesture is also triggered on touches to the data segment in the Legend
+            .chartLegend(style: DefaultLegendStyle(nameMapper: sampleCalendarDataNameMapper))
+    }
+    .padding(.all)
+}
+```
+
 ## Future Goals
 
 Some things I want to achieve (and/or have plans for), in no particular order: 
@@ -219,7 +249,7 @@ Some things I want to achieve (and/or have plans for), in no particular order:
 * Interactions
   - Data Loupe
   - Navigation Links
-  - Custom Actions
+  - Brroader support for custom actions
 * Unit testing for the Data & Layout layers
 
 I welcome pull-requests for improvements and bug-fixes, but please reach out to me or discuss in the Issues thread prior to diving in to something to make sure it's not something I'm actively working on.

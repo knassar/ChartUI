@@ -37,6 +37,9 @@ struct RadialChart<Sector: SectorShape, Underlay: View, Overlay: View>: View {
     @Environment(\.categorizedDataStyle)
     var categorizedData: CategorizedDataStyle
 
+    @Environment(\.isEnabled)
+    var isEnabled: Bool
+
     init(data: AnyCategorizedDataSeries, sectorShape: Sector.Type, underlay: Underlay?, overlay: Overlay?) {
         self.data = data
         self.sectorShape = sectorShape
@@ -51,8 +54,9 @@ struct RadialChart<Sector: SectorShape, Underlay: View, Overlay: View>: View {
                     if let underlay = underlay {
                         underlay
                     }
-                    ForEach(zOrderedDatums) {
-                        RadialSector(datum: $0, shape: sectorShape)
+                    ForEach(zOrderedDatums) { datum in
+                        RadialSector(datum: datum, shape: sectorShape)
+                            .gesture(gesture(for: datum))
                             .animation(.default)
                     }
                     if let overlay = overlay {
@@ -68,6 +72,28 @@ struct RadialChart<Sector: SectorShape, Underlay: View, Overlay: View>: View {
 
     private var zOrderedDatums: [AnyCategorizedDatum] {
         data.categorizedData.sorted { categorizedData.zIndex(for: $0) < categorizedData.zIndex(for: $1) }
+    }
+
+    private func gesture(for datum: AnyCategorizedDatum) -> some Gesture {
+        DragGesture(minimumDistance: 0)
+            .onChanged { value in
+                guard value.startLocation == value.location else { return }
+                self.onTouchDown(datum)
+            }
+            .onEnded { _ in
+                self.onTouchUp()
+            }
+    }
+
+    private func onTouchDown(_ datum: AnyCategorizedDatum) {
+        guard isEnabled else { return }
+        categorizedData.momentaryTapHandler?(datum)
+        categorizedData.tapHandler?(datum)
+    }
+
+    private func onTouchUp() {
+        guard isEnabled else { return }
+        categorizedData.momentaryTapHandler?(nil)
     }
 
 }

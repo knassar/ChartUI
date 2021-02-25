@@ -37,6 +37,11 @@ public struct CategorizedDataStyle {
     fileprivate var defaultValues = Values()
     fileprivate var datumValues = [AnyHashable: Values]()
 
+    public typealias SegmentTapHandler = (AnyCategorizedDatum?) -> Void
+
+    var tapHandler: SegmentTapHandler?
+    var momentaryTapHandler: SegmentTapHandler?
+
     struct Values {
         var zIndex: Int?
         var fill: Color?
@@ -265,6 +270,42 @@ extension View {
 
 }
 
+// MARK: - Interactions
+
+extension View {
+
+    /// Adds a handler for tap gestures on segments of cateogorized data charts.
+    ///
+    /// The supplied handler will be invoked with an `AnyCategorizedDatum` when the datum's visual segment is tapped.
+    /// If the chart includes a stand-alone Legend, taps on the legend rows will also invoke the handler.
+    /// - Parameter handler: A touch handler to receive the tapped datum
+    /// - Returns: A modified view
+    public func onChartSegmentTapGesture(_ handler: CategorizedDataStyle.SegmentTapHandler?) -> some View {
+        self.modifier(CategorizedDataStyleWrapper(modifier: { style in
+            var style = style
+            style.tapHandler = handler
+            return style
+        }))
+    }
+
+    /// Adds a handler for momentary touch gestures on segments of cateogorized data charts.
+    ///
+    /// The supplied handler will be invoked with an `AnyCategorizedDatum` when the datum's visual segment is touched, and invoked again with a `nil` argument when the touch is released.
+    /// If the chart includes a stand-alone Legend, taps on the legend rows will also invoke the handler.
+    /// - Parameter handler: A touch handler to receive the touch events
+    /// - Returns: A modified view
+    public func onChartSegmentMomentaryTouchGesture(_ handler: CategorizedDataStyle.SegmentTapHandler?) -> some View {
+        self.modifier(CategorizedDataStyleWrapper(modifier: { style in
+            var style = style
+            style.momentaryTapHandler = handler
+            return style
+        }))
+    }
+
+}
+
+// MARK: - Library Content
+
 struct CategorizedDataStyle_LibraryContent: LibraryContentProvider {
 
     @LibraryContentBuilder
@@ -293,6 +334,17 @@ struct CategorizedDataStyle_LibraryContent: LibraryContentProvider {
         LibraryItem(base.chartLegend(style: DefaultLegendStyle()),
                     title: "Chart Legend",
                     category: .layout)
+
+        // Interaction
+
+        LibraryItem(base.onChartSegmentTapGesture({ datum in }),
+                    title: "Chart Segment: Tap",
+                    category: .layout)
+
+        LibraryItem(base.onChartSegmentMomentaryTouchGesture({ datum in }),
+                    title: "Chart Segment: Touch Momentary",
+                    category: .layout)
+
 
     }
 

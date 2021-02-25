@@ -238,12 +238,12 @@ struct MiniMap_Previews: PreviewProvider {
             VStack {
                 HStack {
                     Picker("Range", selection: $xRange) {
-                        Text("Year").tag(Range<Date>.previousYear)
-                        Text("3 Months").tag(
+                        Text("1 Y").tag(Range<Date>.previousYear)
+                        Text("3 M").tag(
                             Calendar.current.date(byAdding: .month, value: -3, to: .today)!.dayStart..<Date.today.dayAfter
                         )
-                        Text("Month").tag(Range<Date>.previousMonth)
-                        Text("Week").tag(Range<Date>.previousWeek)
+                        Text("1 M").tag(Range<Date>.previousMonth)
+                        Text("1 W").tag(Range<Date>.previousWeek)
                     }
                     .padding(.vertical, 8)
                     .pickerStyle(SegmentedPickerStyle())

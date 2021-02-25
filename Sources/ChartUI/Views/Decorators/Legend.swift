@@ -120,6 +120,9 @@ struct StandAloneLegend: View {
     @Environment(\.categorizedDataStyle)
     var style: CategorizedDataStyle
 
+    @Environment(\.isEnabled)
+    var isEnabled: Bool
+
     var body: some View {
         ZStack(alignment: legendStyle.position) {
             switch legendStyle.orientation {
@@ -186,6 +189,7 @@ struct StandAloneLegend: View {
                     .lineLimit(1)
             }
         }
+        .gesture(gesture(for: datum))
         .font(.caption)
     }
 
@@ -198,6 +202,28 @@ struct StandAloneLegend: View {
         default:
             return nil
         }
+    }
+
+    private func gesture(for datum: AnyCategorizedDatum) -> some Gesture {
+        DragGesture(minimumDistance: 0)
+            .onChanged { value in
+                guard value.startLocation == value.location else { return }
+                self.onTouchDown(datum)
+            }
+            .onEnded { _ in
+                self.onTouchUp()
+            }
+    }
+
+    private func onTouchDown(_ datum: AnyCategorizedDatum) {
+        guard isEnabled else { return }
+        style.momentaryTapHandler?(datum)
+        style.tapHandler?(datum)
+    }
+
+    private func onTouchUp() {
+        guard isEnabled else { return }
+        style.momentaryTapHandler?(nil)
     }
 
 }

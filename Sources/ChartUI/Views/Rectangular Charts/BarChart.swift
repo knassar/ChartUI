@@ -10,21 +10,24 @@ import SwiftUI
 
 /// Chart a series of categorized values as vertical bars
 struct BarChart<P: CategorizedDatum, Underlay: View, Overlay: View>: View {
-
+    
     private var data: DataSeries<P>
-
+    
     private var underlay: Underlay?
-
+    
     private var overlay: Overlay?
-
+    
     @Environment(\.lineChartStyle)
     private var lineStyle: LineChartStyle
-
+    
     @Environment(\.rectangularChartStyle)
     private var rectChartStyle: RectangularChartStyle
-
+    
     @Environment(\.categorizedDataStyle)
     private var categorizedData: CategorizedDataStyle
+
+    @Environment(\.isEnabled)
+    var isEnabled: Bool
 
     /// Initialize a `BarChart` view
     /// - Parameters:
@@ -36,7 +39,7 @@ struct BarChart<P: CategorizedDatum, Underlay: View, Overlay: View>: View {
         self.underlay = underlay
         self.overlay = overlay
     }
-
+    
     /// Initialize a `BarChart` view
     /// - Parameters:
     ///   - data: A `DataSeries` whose data type is a `CategorizedDatum`
@@ -46,7 +49,7 @@ struct BarChart<P: CategorizedDatum, Underlay: View, Overlay: View>: View {
         self.underlay = underlay
         self.overlay = nil
     }
-
+    
     /// Initialize a `BarChart` view
     /// - Parameters:
     ///   - data: A `DataSeries` whose data type is a `CategorizedDatum`
@@ -56,7 +59,7 @@ struct BarChart<P: CategorizedDatum, Underlay: View, Overlay: View>: View {
         self.underlay = nil
         self.overlay = overlay
     }
-
+    
     /// Initialize a `BarChart` view
     /// - Parameters:
     ///   - data: A `DataSeries` whose data type is a `CategorizedDatum`
@@ -65,7 +68,7 @@ struct BarChart<P: CategorizedDatum, Underlay: View, Overlay: View>: View {
         self.underlay = nil
         self.overlay = nil
     }
-
+    
     public var body: some View {
         GeometryReader { geometry in
             RectangularChartLayoutComposer(data: data, geometry: geometry) {
@@ -76,8 +79,9 @@ struct BarChart<P: CategorizedDatum, Underlay: View, Overlay: View>: View {
                 if let underlay = underlay {
                     underlay
                 }
-                ForEach(zOrderedDatums) {
-                    Bar(datum: $0, shape: RectBar.self)
+                ForEach(zOrderedDatums) { datum in
+                    Bar(datum: datum, shape: RectBar.self)
+                        .gesture(gesture(for: datum))
                         .animation(.default)
                 }
                 if let overlay = overlay {
@@ -88,40 +92,65 @@ struct BarChart<P: CategorizedDatum, Underlay: View, Overlay: View>: View {
             .drawingGroup()
         }
     }
-
+    
     private var zOrderedDatums: [AnyCategorizedDatum] {
         data.categorizedData.sorted { categorizedData.zIndex(for: $0) < categorizedData.zIndex(for: $1) }
+    }
+
+    private func gesture(for datum: AnyCategorizedDatum) -> some Gesture {
+        DragGesture(minimumDistance: 0)
+            .onChanged { value in
+                guard value.startLocation == value.location else { return }
+                self.onTouchDown(datum)
+            }
+            .onEnded { _ in
+                self.onTouchUp()
+            }
+    }
+
+    private func onTouchDown(_ datum: AnyCategorizedDatum) {
+        guard isEnabled else { return }
+        categorizedData.momentaryTapHandler?(datum)
+        categorizedData.tapHandler?(datum)
+    }
+
+    private func onTouchUp() {
+        guard isEnabled else { return }
+        categorizedData.momentaryTapHandler?(nil)
     }
 
 }
 
 struct BarChart_LibraryContent: LibraryContentProvider {
-
+    
     @LibraryContentBuilder
     var views: [LibraryItem] {
         LibraryItem(
             BarChart(data: sampleCalendarData,
-                      underlay: ZStack { /* add decorators here */ },
-                      overlay: ZStack { /* add decorators here */ }),
+                     underlay: ZStack { /* add decorators here */ },
+                     overlay: ZStack { /* add decorators here */ }),
             category: .other
-            )
+        )
     }
-
+    
 }
 
 struct BarChart_Previews: PreviewProvider {
-
+    
     static var toggle = true
-
+    
     static var previews: some View {
         AnimatingPreview()
     }
-
+    
     struct AnimatingPreview: View {
-
+        
         @State
         var dataToggle = true
-
+        
+        @State
+        var tappedDatumId: AnyHashable?
+        
         var body: some View {
             VStack {
                 Spacer()
@@ -130,27 +159,36 @@ struct BarChart_Previews: PreviewProvider {
                     YAxisRange(10...20)
                         .rectChartRange(stroke: .blue)
                 })
-                    .chartInsets(.leading, 80)
-                    .chartInsets(.top, 50)
-                    .chartInsets(.all, 20)
-                    .chartSegments(strokeColor: .black)
-                    .chartLegend(style: DefaultLegendStyle(position: .topLeading))
-                    .frame(height: 280)
-                    .border(Color.gray)
-                    .barChart(width: 8)
-                    .rectChart(yAxisGrid: YAxisGrid(spacing: 10))
+                .chartInsets(.leading, 80)
+                .chartInsets(.top, 50)
+                .chartInsets(.all, 20)
+                .barChart(width: 20, for: tappedDatumId)
+                .onChartSegmentTapGesture { datum in
+                    tappedDatumId = datum?.id
+                }
+                .chartSegments(strokeColor: .black)
+                .chartLegend(style: DefaultLegendStyle(position: .topLeading))
+                .frame(height: 280)
+                .border(Color.gray)
+                .barChart(width: 8)
+                .rectChart(yAxisGrid: YAxisGrid(spacing: 10))
                 Spacer()
                 Text("BarChart with an Inline Legend")
                 BarChart(data: dataToggle ? sampleCalendarData : sampleCalendarData2, underlay: ZStack {
                     YAxisRange(10...20)
                         .rectChartRange(stroke: .blue)
                 })
-                    .chartInsets(.all, 20)
-                    .chartSegments(strokeColor: .black)
-                    .chartLegend(style: InlineLegendStyle())
-                    .frame(height: 200)
-                    .border(Color.gray)
-                    .rectChart(yAxisGrid: YAxisGrid(spacing: 10))
+                .chartInsets(.all, 20)
+                .chartSegments(strokeColor: .black)
+                .chartLegend(style: InlineLegendStyle())
+                .chartSegment(strokeWidth: 2, for: tappedDatumId)
+                .chartSegment(strokeColor: .accentColor, for: tappedDatumId)
+                .onChartSegmentMomentaryTouchGesture { datum in
+                    tappedDatumId = datum?.id
+                }
+                .frame(height: 200)
+                .border(Color.gray)
+                .rectChart(yAxisGrid: YAxisGrid(spacing: 10))
                 Spacer()
                 Button(action: { $dataToggle.wrappedValue.toggle() }, label: {
                     Text("Change Data")
@@ -158,7 +196,7 @@ struct BarChart_Previews: PreviewProvider {
             }
             .padding(.all)
         }
-
+        
     }
-
+    
 }
