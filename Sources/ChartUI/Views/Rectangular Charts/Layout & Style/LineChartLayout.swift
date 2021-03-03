@@ -44,7 +44,9 @@ public struct LineChartLayoutComposer<Underlay: View, Content: View>: View {
             }
         }
         .orderedChartData(data)
-        .attachScrollInteraction(with: offsetBinding)
+        .modifier(if: lineChartStyle.scrollEnabled) {
+            $0.attachScrollInteraction(with: offsetBinding)
+        }
         .chartLayout(localFrame: localFrame)
         .environment(\.lineChartLayout, lineLayout)
         .environment(\.rectangularChartLayout, rectLayout)

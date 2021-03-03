@@ -42,6 +42,10 @@ public struct CategorizedDataStyle {
     var tapHandler: SegmentTapHandler?
     var momentaryTapHandler: SegmentTapHandler?
 
+    var hasInteraction: Bool {
+        tapHandler != nil || momentaryTapHandler != nil
+    }
+
     struct Values {
         var zIndex: Int?
         var fill: Color?

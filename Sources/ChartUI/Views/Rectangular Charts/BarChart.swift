@@ -81,7 +81,9 @@ struct BarChart<P: CategorizedDatum, Underlay: View, Overlay: View>: View {
                 }
                 ForEach(zOrderedDatums) { datum in
                     Bar(datum: datum, shape: RectBar.self)
-                        .gesture(gesture(for: datum))
+                        .modifier(if: categorizedData.hasInteraction) {
+                            $0.gesture(gesture(for: datum))
+                        }
                         .animation(.default)
                 }
                 if let overlay = overlay {
@@ -142,7 +144,7 @@ struct BarChart_Previews: PreviewProvider {
     static var previews: some View {
         AnimatingPreview()
     }
-    
+
     struct AnimatingPreview: View {
         
         @State
@@ -150,7 +152,13 @@ struct BarChart_Previews: PreviewProvider {
         
         @State
         var tappedDatumId: AnyHashable?
-        
+
+        @State
+        var interaction = true
+
+        @State
+        var tapped = false
+
         var body: some View {
             VStack {
                 Spacer()
@@ -183,20 +191,45 @@ struct BarChart_Previews: PreviewProvider {
                 .chartLegend(style: InlineLegendStyle())
                 .chartSegment(strokeWidth: 2, for: tappedDatumId)
                 .chartSegment(strokeColor: .accentColor, for: tappedDatumId)
-                .onChartSegmentMomentaryTouchGesture { datum in
-                    tappedDatumId = datum?.id
-                }
                 .frame(height: 200)
                 .border(Color.gray)
                 .rectChart(yAxisGrid: YAxisGrid(spacing: 10))
-                Spacer()
-                Button(action: { $dataToggle.wrappedValue.toggle() }, label: {
-                    Text("Change Data")
+                .modifier(if: interaction) {
+                    $0.onChartSegmentMomentaryTouchGesture { datum in
+                        tappedDatumId = datum?.id
+                    }
+                }
+                .onTapGesture {
+                    tapped = true
+                }
+                .sheet(isPresented: $tapped, content: {
+                    Text("Tapped")
                 })
+
+                Spacer()
+                HStack {
+                    Button(action: { dataToggle.toggle() }, label: {
+                        Text("Change Data")
+                    })
+                    Spacer()
+                    Button(action: { interaction.toggle() }) {
+                        if interaction {
+                            Color.accentColor
+                                .cornerRadius(2)
+                                .frame(width: 10, height: 10)
+                        } else {
+                            RoundedRectangle(cornerRadius: 2)
+                                .stroke(Color.accentColor, lineWidth: 1)
+                                .frame(width: 10, height: 10)
+                        }
+                        Text("Interaction")
+                            .font(.caption)
+                    }
+                }
             }
             .padding(.all)
         }
-        
+
     }
     
 }

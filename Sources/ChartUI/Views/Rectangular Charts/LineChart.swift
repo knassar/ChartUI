@@ -211,6 +211,9 @@ struct LineChart_Previews: PreviewProvider {
         @State
         var scrollOffset: CGFloat = 1
 
+        @State
+        var tapped: Bool = false
+
         var body: some View {
             VStack {
                 controlPanel
@@ -312,6 +315,12 @@ struct LineChart_Previews: PreviewProvider {
                 .rectChart(xAxisGrid: XAxisGrid(origin: .today, spacing: TimeInterval.days(1)))
                 .rectChart(originMark: .line(width: 2))
                 .rectChart(originColor: .purple)
+                .sheet(isPresented: $tapped, content: {
+                    Text("Tapped")
+                })
+                .onTapGesture {
+                    tapped.toggle()
+                }
 
                 LineChart(data: temperatureData, trimmedTo: xRange, underlay: ZStack {
                     if ranges {

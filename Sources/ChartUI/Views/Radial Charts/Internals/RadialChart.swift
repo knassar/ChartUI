@@ -56,7 +56,9 @@ struct RadialChart<Sector: SectorShape, Underlay: View, Overlay: View>: View {
                     }
                     ForEach(zOrderedDatums) { datum in
                         RadialSector(datum: datum, shape: sectorShape)
-                            .gesture(gesture(for: datum))
+                            .modifier(if: categorizedData.hasInteraction) {
+                                $0.gesture(gesture(for: datum))
+                            }
                             .animation(.default)
                     }
                     if let overlay = overlay {
