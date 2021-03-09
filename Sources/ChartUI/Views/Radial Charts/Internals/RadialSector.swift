@@ -22,7 +22,7 @@ struct RadialSector<Shape: SectorShape>: View {
     var body: some View {
         if let segmentLayout = layout.segment(at: datum.index), segmentLayout.isValid {
             shape.init(segment: segmentLayout)
-                .strokeBorder(stroke, lineWidth: strokeWidth)
+                .strokeBorder(stroke, style: StrokeStyle(lineWidth: strokeWidth, lineJoin: .round))
                 .background(shape.init(segment: segmentLayout).fill(fill))
         }
     }
