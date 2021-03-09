@@ -24,6 +24,7 @@ public protocol ColorSet {
 
 }
 
+/// A basic ColorSet which supplies a large set of randome colors based on a seed-string, which repeat eventually
 public struct BasicColorSet: ColorSet {
 
     public func color(at index: Int) -> Color {
@@ -38,6 +39,21 @@ public struct BasicColorSet: ColorSet {
         let g: UInt64 = (int >> 4 & 0xF) * 17
         let b: UInt64 = (int & 0xF) * 17
         return Color(red: Double(r) / 255, green: Double(g) / 255, blue: Double(b) / 255)
+    }
+
+}
+
+/// A ColorSet which repeats over a finite set of colors supplied at initialization.
+public struct RepeatingColorSet: ColorSet {
+
+    public let colors: [Color]
+
+    public init(colors: [Color]) {
+        self.colors = colors
+    }
+
+    public func color(at index: Int) -> Color {
+        colors[index % colors.count]
     }
 
 }
