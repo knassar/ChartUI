@@ -20,6 +20,22 @@ Categorized data charts gracefully animate value changes when you replace their 
 
 Ordered data charts gracefully animate changes to their visible X boundaries.
 
+<table style="border: none;">
+    <tr>
+        <td rowspan="2" width="33%">
+            <img src="docs/assets/minimap.gif" alt="LineChart with MiniMap"/>
+            <img src="docs/assets/pie-chart.gif" alt="PieChart"/>
+        </td>
+        <td width="33%">
+            <img src="docs/assets/line-charts.gif" alt="LineChart"/>
+        </td>
+        <td rowspan="2" width="33%">
+            <img src="docs/assets/bar-chart.gif" alt="BarChart"/>
+            <img src="docs/assets/ring-chart.gif" alt="RingChart"/>
+        </td>
+    </tr>
+</table>
+
 ## Data
 
 At the heart of each chart is a `DataSeries`, which is initialized with an array of values conforming to either `OrderedDatum`, or `CategorizedDatum` protocols. The datum protocol determines which charts are available.
@@ -93,6 +109,8 @@ func dataSeries(for timeTemp: [Date: Temperature]) -> DataSeries<TimeSeriesDatum
 
 And we can now create a `LineChart` in our view displaying our "temperature over time" data:
 
+<img src="docs/assets/timetemp.png" alt="Temperature over Time" width=400/>
+
 ```
 var tempsOverTime: [Date: Temperature]
 
@@ -126,6 +144,8 @@ Markings for X & Y grids for rectangular charts, and chart Legends for categoriz
 ### Using Decorators
 
 To continue on with our example, suppose we want to highlight certain ranges of temperatures in our chart, and also any points which fall within these ranges. We can do this by adding decorators. For this example, we'll add `YAxisRange` and `PointHighlight` decorators to our chart. We'll also use some of ChartUI's view modifiers to add grids and insets to refine our presentation: 
+
+<img src="docs/assets/timetemp-decorators.png" alt="Temperature over Time, decorated" width=400/>
 
 ```
 var tempsOverTime: [Date: Temperature]
@@ -189,7 +209,7 @@ var scroll: CGFloat = 1
 
 var body: some View {
     VStack {
-        
+    
         // Read-out the scroll position in real-time
         Text("scrolled to: \(scroll)")
             .font(.caption)
@@ -199,10 +219,10 @@ var body: some View {
             .frame(height: 24)
 
         LineChart(data: myDataSeries, trimmedTo: xRange)
-        
+    
             // Activates scrolling and associates with the scroll state property
             .lineChart(scrollOffset: $scroll)
-    
+
             .rectChart(xAxisGrid: XAxisGrid(origin: .today, spacing: TimeInterval.days(1)))
             .rectChart(yAxisGrid: YAxisGrid(origin: 0, spacing: 10))
             .frame(height: 160)
