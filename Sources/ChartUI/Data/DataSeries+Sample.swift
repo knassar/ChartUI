@@ -54,7 +54,7 @@ private func calendarData(offset: Int = 0) -> DataSeries<IdentifiedValueDatum<St
         "Oct",
         "Nov",
         "Dec",
-    ].map { .count(Int(seeds.removeFirst().value), for: $0) }
+    ].map { .value(Int(seeds.removeFirst().value), for: $0) }
     return DataSeries(data: data)
 }
 
@@ -100,7 +100,7 @@ let sampleQuarters: DataSeries<IdentifiedValueDatum<String, Int>> = {
         "Q2",
         "Q3",
         "Q4",
-    ].map { .count(Int(seeds.removeFirst().value), for: $0) }
+    ].map { .value(Int(seeds.removeFirst().value), for: $0) }
 
     return DataSeries(data: data)
 }()

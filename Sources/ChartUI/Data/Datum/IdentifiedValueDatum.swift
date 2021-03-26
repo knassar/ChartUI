@@ -26,14 +26,14 @@ import SwiftUI
 public enum IdentifiedValueDatum<Id: InvalidatableId, Value: DataValue>: CategorizedDatum {
 
     /// A count for a given name
-    case count(Value, for: Id)
+    case value(Value, for: Id)
 
     /// an invalid datum
     case invalid
 
     public var y: Value {
         switch self {
-        case let .count(y, _):
+        case let .value(y, _):
             return y
         case .invalid:
             return .absoluteMinimum
@@ -42,7 +42,7 @@ public enum IdentifiedValueDatum<Id: InvalidatableId, Value: DataValue>: Categor
 
     public var id: Id {
         switch self {
-        case let .count(_, id):
+        case let .value(_, id):
             return id
         case .invalid:
             return .invalidId
@@ -53,7 +53,7 @@ public enum IdentifiedValueDatum<Id: InvalidatableId, Value: DataValue>: Categor
 
     public var yValue: CGFloat {
         switch self {
-        case let .count(y, _):
+        case let .value(y, _):
             return y.dataSeriesValue
         case .invalid:
             return .nan
@@ -62,7 +62,7 @@ public enum IdentifiedValueDatum<Id: InvalidatableId, Value: DataValue>: Categor
 
     public var isValid: Bool {
         switch self {
-        case .count:
+        case .value:
             return true
         case .invalid:
             return false
